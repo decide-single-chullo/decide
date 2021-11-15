@@ -4,6 +4,7 @@ from django.utils import timezone
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
+from census.models import Census
 
 from .filters import StartedFilter
 
@@ -12,6 +13,8 @@ def start(modeladmin, request, queryset):
     for v in queryset.all():
         v.create_pubkey()
         v.start_date = timezone.now()
+        voter=request.user.id
+        Census.objects.get_or_create(voter_id=voter, voting_id=v.id)
         v.save()
 
 
