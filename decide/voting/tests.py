@@ -1,5 +1,7 @@
 import random
 import itertools
+import sys
+
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -31,13 +33,13 @@ class VotingTestCase(BaseTestCase):
         k.k = ElGamal.construct((p, g, y))
         return k.encrypt(msg)
 
-    def create_voting(self):
+    def create_voting(self, vot):
         q = Question(desc='test question')
         q.save()
         for i in range(5):
             opt = QuestionOption(question=q, option='option {}'.format(i+1))
             opt.save()
-        v = Voting(name='test voting', question=q)
+        v = Voting(name=vot, question=q)
         v.save()
 
         a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
@@ -54,6 +56,13 @@ class VotingTestCase(BaseTestCase):
             u.save()
             c = Census(voter_id=u.id, voting_id=v.id)
             c.save()
+
+    def create_superusers(self):
+        for i in range(100):
+            u, _ = User.objects.get_or_create(username='testsuperuser{}'.format(i))
+            u.is_active = True
+            u.is_superuser = True
+            u.save()
 
     def get_or_create_user(self, pk):
         user, _ = User.objects.get_or_create(pk=pk)
@@ -84,7 +93,7 @@ class VotingTestCase(BaseTestCase):
         return clear
 
     def test_complete_voting(self):
-        v = self.create_voting()
+        v = self.create_voting('vot1')
         self.create_voters(v)
 
         v.create_pubkey()
@@ -131,8 +140,38 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 201)
 
+#   Test for feature 03 that checks if when a voting is started, all superusers are automatically added to the census of that voting
+    def test_add_automatically_to_census_from_api(self):
+        voting = self.create_voting('vot3')
+        self.create_superusers()
+        data = {'action': 'start'}
+        response = self.client.post('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 401)
+
+        # login with user admin
+        self.login()
+        data = {'action': 'bad'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+        # start voting
+        data = {'action': 'start'}
+        response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), 'Voting started')
+        cens = []
+        for u in Census.objects.all():
+            if(u.voting_id==voting.id):
+                cens.append(u.voter_id)
+
+        users = []
+        for u in User.objects.all():
+            if(u.is_superuser):
+                users.append(u.id)
+        self.assertListEqual(cens, users)
+
     def test_update_voting(self):
-        voting = self.create_voting()
+        voting = self.create_voting('vot3')
 
         data = {'action': 'start'}
         #response = self.client.post('/voting/{}/'.format(voting.pk), data, format='json')
