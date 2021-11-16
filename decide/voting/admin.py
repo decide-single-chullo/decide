@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.utils import timezone
-
+from django.contrib.auth.models import User
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
 from census.models import Census
+
 
 from .filters import StartedFilter
 
@@ -14,7 +15,11 @@ def start(modeladmin, request, queryset):
         v.create_pubkey()
         v.start_date = timezone.now()
         voter=request.user.id
-        Census.objects.get_or_create(voter_id=voter, voting_id=v.id)
+
+        for u in User.objects.all():
+            if(u.is_superuser):
+                Census.objects.get_or_create(voter_id=u.id, voting_id=v.id)
+        
         v.save()
 
 
