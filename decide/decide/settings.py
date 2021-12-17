@@ -70,7 +70,7 @@ MODULES = [
     'voting',
 ]
 
-BASEURL = 'http://localhost:8000'
+BASEURL = 'https://decide-single-chullo.herokuapp.com'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -81,6 +81,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+APIS = {
+    'authentication': 'http://decide-single-chullo.herokuapp.com',
+    'base': 'http://decide-single-chullo.herokuapp.com',
+    'booth': 'http://decide-single-chullo.herokuapp.com',
+    'census': 'http://decide-single-chullo.herokuapp.com',
+    'mixnet': 'http://decide-single-chullo.herokuapp.com',
+    'postproc': 'http://decide-single-chullo.herokuapp.com',
+    'store': 'http://decide-single-chullo.herokuapp.com',
+    'visualizer': 'http://decide-single-chullo.herokuapp.com',
+    'voting': 'http://decide-single-chullo.herokuapp.com',
+}
 
 ROOT_URLCONF = 'decide.urls'
 
@@ -180,3 +192,5 @@ if os.path.exists("config.jsonnet"):
 
 
 INSTALLED_APPS = INSTALLED_APPS + MODULES
+import django_heroku
+django_heroku.settings(locals())
