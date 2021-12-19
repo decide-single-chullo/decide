@@ -68,7 +68,7 @@ def upload_file_view(request):
                     pass
                 else:
                     print(Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists())
-                    if Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists():
+                    if Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()==True:
                         pass
                     print(row)
                     census = Census(voting_id=row[0], voter_id=row[1])
