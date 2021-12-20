@@ -1,6 +1,7 @@
 import django_filters.rest_framework
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -9,7 +10,7 @@ from .models import Question, QuestionOption, Voting
 from .serializers import SimpleVotingSerializer, VotingSerializer
 from base.perms import UserIsStaff
 from base.models import Auth
-
+from census.models import Census
 
 class VotingView(generics.ListCreateAPIView):
     queryset = Voting.objects.all()
@@ -68,6 +69,10 @@ class VotingUpdate(generics.RetrieveUpdateDestroyAPIView):
                 msg = 'Voting already started'
                 st = status.HTTP_400_BAD_REQUEST
             else:
+                for u in User.objects.all():
+                    if(u.is_superuser):
+                        Census.objects.get_or_create(voter_id=u.id, voting_id=voting.id)
+                
                 voting.start_date = timezone.now()
                 voting.save()
                 msg = 'Voting started'
