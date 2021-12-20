@@ -11,10 +11,11 @@ from rest_framework.status import (
 )
 
 from base.perms import UserIsStaff
-from .models import Census
+from .models import Census, Csv
 from .forms import CsvModelForm
 from django.shortcuts import render
-from .models import Csv
+from voting.models import Voting
+from django.contrib.auth.models import User
 import csv
 import os
 
@@ -64,15 +65,22 @@ def upload_file_view(request):
             reader = csv.reader(f)
 
             for i, row in enumerate(reader):
+                
                 if i==0:
                     pass
                 else:
-                    print(Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists())
-                    if Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()==True:
+                    bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
+                    if bool:
                         pass
-                    print(row)
-                    census = Census(voting_id=row[0], voter_id=row[1])
-                    census.save()
+                    elif not Voting.objects.filter(id=row[0]).exists():
+                        pass
+                    elif not User.objects.filter(id=row[1]).exists():
+                        pass
+                    else:
+                        # print(row)
+                        census = Census(voting_id=row[0], voter_id=row[1])
+                        census.save()
+
             obj.activated = True
             obj.save()
         os.remove(obj.file_name.path)
