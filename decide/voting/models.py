@@ -8,7 +8,7 @@ from base.models import Auth, Key
 
 
 class Question(models.Model):
-    desc = models.TextField()
+    desc = models.TextField(unique = True)
 
     def __str__(self):
         return self.desc
