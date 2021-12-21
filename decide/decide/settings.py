@@ -1,3 +1,4 @@
+
 """
 Django settings for decide project.
 
@@ -12,6 +13,10 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import django_heroku
+import decouple
+from decouple import config
+
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -193,3 +198,12 @@ if os.path.exists("config.jsonnet"):
 
 INSTALLED_APPS = INSTALLED_APPS + MODULES
 django_heroku.settings(locals()) 
+
+TEMPLATE_DIRS = ('/home/egc/decideChullo/decide/voting/templates',)
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'recuentovotosdecide@gmail.com'
+EMAIL_HOST_PASSWORD = 'egc2021A!'
+EMAIL_PORT = 587
+

@@ -22,10 +22,14 @@ def stop(ModelAdmin, request, queryset):
 
 
 def tally(ModelAdmin, request, queryset):
+    
     for v in queryset.filter(end_date__lt=timezone.now()):
         token = request.session.get('auth-token', '')
-        v.tally_votes(token)
+        v.tally_votes(request.user,token)
+        
 
+ 
+    
 
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
