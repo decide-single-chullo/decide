@@ -51,18 +51,26 @@
 
             <!-- Voting -->
             <div v-if="!signup">
-                <h2>[[ voting.question.desc ]]</h2>
-                <b-form-group v-for="opt in voting.question.options" :key="opt.number">
-                    <b-form-radio v-model="selected"
-                                  :id="'q' + opt.number"
-                                  name="question"
-                                  :value="opt.number">
+                <br>
+                <h2>[[ question.desc ]]</h2>
+                <b-form-group v-for="opt in question.options">
+                    <b-form-radio
+                                v-model="selected"
+                                :id="'q' + opt.number"
+                                name="question"
+                                size="lg"
+                                :value="opt.number">
                         [[ opt.option ]]
                     </b-form-radio>
                 </b-form-group>
-                <b-button type="button" variant="primary" v-on:click="decideSend">
+                <br><br>
+                <b-button type="button" id=voteBtn :disabled=false variant="primary" v-on:click="decideSend">
                     {% trans "Vote" %}
                 </b-button>
+                {% if not last_question %}
+                    <a class="btn btn-primary" style="margin-left: 30px;" href="{% url 'voting' voting_id next_question_id %}" role="button">Siguiente pregunta</a>
+                {% endif %}
+                
             </div>
         </div>
     </div>
@@ -87,12 +95,14 @@
 
     <script>
         var voting = {{voting|safe}};
+        var question = {{question|safe}};
         var app = new Vue({
             delimiters: ['[[', ']]'],
             el: '#app-booth',
             data: {
                 keybits: {{ KEYBITS }},
                 voting: voting,
+                question: question,
                 selected: "",
                 signup: true,
                 alertShow: false,
@@ -190,12 +200,17 @@
                     var data = {
                         vote: {a: v.alpha.toString(), b: v.beta.toString()},
                         voting: this.voting.id,
+                        question: this.question.id,
                         voter: this.user.id,
                         token: this.token
                     }
                     this.postData("{% url "gateway" "store" "/" %}", data)
                         .then(data => {
                             this.showAlert("success", '{% trans "Conglatulations. Your vote has been sent" %}');
+                            var btn = document.getElementById('voteBtn')
+                            btn.innerText = 'Already voted'
+                            btn.disabled = true;
+                            
                         })
                         .catch(error => {
                             this.showAlert("danger", '{% trans "Error: " %}' + error);
