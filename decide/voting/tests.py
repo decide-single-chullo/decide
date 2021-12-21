@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
+from django.db import IntegrityError
 
 from base import mods
 from base.tests import BaseTestCase
@@ -115,6 +116,15 @@ class VotingTestCase(BaseTestCase):
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
+#   Test for feature 05 that checks if when a voting is created the name is not already in other voting
+
+    def test_create_voting_withUniqueName(self):
+        v = self.create_voting("voting1")
+        try:
+            v2 = self.create_voting("voting1")
+        except IntegrityError: 
+            self.assertRaises(IntegrityError)
+
     def test_create_voting_from_api(self):
         data = {'name': 'Example'}
         response = self.client.post('/voting/', data, format='json')
@@ -139,6 +149,7 @@ class VotingTestCase(BaseTestCase):
 
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 201)
+
 
 #   Test for feature 03 that checks if when a voting is started, all superusers are automatically added to the census of that voting
     def test_add_automatically_to_census_from_api(self):
