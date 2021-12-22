@@ -32,6 +32,7 @@ class Voting(models.Model):
     name = models.CharField(max_length=200, unique=True)
     desc = models.TextField(blank=True, null=True)
     question = models.ManyToManyField(Question, related_name='voting')
+    total_votes = models.PositiveIntegerField(default=0)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -60,8 +61,12 @@ class Voting(models.Model):
     def get_votes(self, token=''):
         # gettings votes from store
         votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        #count votes
+        print(votes)
+        self.total_votes = len(votes)
         # anon votes
         return [[i['a'], i['b']] for i in votes]
+        
 
     def tally_votes(self, token=''):
         '''
