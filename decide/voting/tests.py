@@ -23,9 +23,8 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
+
 
 class VotingTestCase(BaseTestCase):
 
@@ -150,7 +149,9 @@ class VotingTestCase(BaseTestCase):
 
     
 #   Api test
+
     def test_create_voting_from_api(self):
+
         data = {'name': 'Example'}
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 401)
@@ -166,6 +167,7 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
 
         data = {
+
         "name": "Votacion de prueba",
         "desc": "Elige tu opción favorita.",
         "question": [
@@ -184,7 +186,7 @@ class VotingTestCase(BaseTestCase):
             }
         ]
     }
-        print(data)
+
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 400) #Analizar porqué no da 201
 
@@ -210,7 +212,6 @@ class VotingTestCase(BaseTestCase):
             }
         ]
     }   
-
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 400)
     
