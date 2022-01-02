@@ -2,10 +2,12 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 
 from base import mods
 from base.models import Auth, Key
 
+import datetime
 
 class Question(models.Model):
     desc = models.TextField(unique = True)
@@ -41,6 +43,12 @@ class Voting(models.Model):
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
+
+    def clean(self):
+        
+        if isinstance(self.start_date,datetime.datetime):
+            raise ValidationError('Voting started cannot be updated.')
+
 
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():

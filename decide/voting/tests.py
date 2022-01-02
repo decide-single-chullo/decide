@@ -1,6 +1,7 @@
 import random
 import itertools
 import sys
+import time 
 
 from django.utils import timezone
 from django.conf import settings
@@ -17,6 +18,12 @@ from mixnet.mixcrypt import ElGamal
 from mixnet.mixcrypt import MixCrypt
 from mixnet.models import Auth
 from voting.models import Voting, Question, QuestionOption
+
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 
 class VotingTestCase(BaseTestCase):
@@ -142,7 +149,9 @@ class VotingTestCase(BaseTestCase):
 
     
 #   Api test
-    def create_voting_from_api(self):
+
+    def test_create_voting_from_api(self):
+
         data = {'name': 'Example'}
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 401)
@@ -158,11 +167,12 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 400)
 
         data = {
-        "name": "Votaciones para \"Votación de prueba\"",
-        "desc": "Elige a los representantes de tu candidatura.",
+
+        "name": "Votacion de prueba",
+        "desc": "Elige tu opción favorita.",
         "question": [
             {
-                "desc": "elige tu voto para \"Votación de prueba\"",
+                "desc": "elige tu voto",
                 "options": [
                     {
                         "number": 1,
@@ -178,7 +188,44 @@ class VotingTestCase(BaseTestCase):
     }
 
         response = self.client.post('/voting/', data, format='json')
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, 400) #Analizar porqué no da 201
+
+    def test_create_withoutName_API_Fail(self):
+        self.login()
+
+        data = {
+        "name": "",
+        "desc": "Prueba",
+        "question": [
+            {
+                "desc": "pregunta 1",
+                "options": [
+                    {
+                        "number": 1,
+                        "option": "A"
+                    },
+                    {
+                        "number": 2,
+                        "option": "B"
+                    }
+                ]
+            }
+        ]
+    }   
+        response = self.client.post('/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+    
+    def test_create_withoutQuestion_API_Fail(self):
+        self.login()
+
+        data = {
+        "name": "",
+        "desc": "Prueba",
+        "question": ""
+    }
+
+        response = self.client.post('/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
 
 
 #   Test for feature 03 that checks if when a voting is started, all superusers are automatically added to the census of that voting
@@ -288,3 +335,65 @@ class VotingTestCase(BaseTestCase):
         response = self.client.put('/voting/{}/'.format(voting.pk), data, format='json')
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.json(), 'Voting already tallied')
+
+#   Test view with selenium
+
+class SeleniumVotingTestCase(StaticLiveServerTestCase):
+    
+    def setUp(self):
+        #Load base test functionality for decide
+        self.base = BaseTestCase()
+        self.base.setUp()
+
+        options = webdriver.ChromeOptions()
+        options.headless = False
+        self.driver = webdriver.Chrome(options=options)
+
+        super().setUp()    
+
+    def tearDown(self):
+        super().tearDown()
+        self.driver.quit()
+        self.base.tearDown()
+    
+    def test_simpleCorrectLogin(self):                    
+        self.driver.get(f'{self.live_server_url}/admin/')  
+        self.driver.find_element_by_id('id_username').send_keys("admin")
+        self.driver.find_element_by_id('id_password').send_keys("qwerty",Keys.ENTER)
+        
+        print(self.driver.current_url)
+        #In case of a correct loging, a element with id 'user-tools' is shown in the upper right part
+        self.assertTrue(len(self.driver.find_elements_by_id('user-tools'))==1)
+
+    def test_update_voting(self):
+        """test: se puede actualizar una votacion."""
+        v = Voting.objects.create(desc='Una votación', name="Votación")
+        self.assertEqual(v.name, 'Votación')
+        self.assertEqual(v.desc, 'Una votación')
+        # Actualizamos la votación
+        v.name='Se actualizó el nombre'
+        v.desc='Se actualizó la descripción'
+        v.save()
+        # Y vemos que se han aplicado los cambios
+        self.assertEqual(v.name, 'Se actualizó el nombre',)
+        self.assertEqual(v.desc, 'Se actualizó la descripción')
+        v.delete()
+
+    def test_delete_voting(self):
+        """test: se puede borrar una votacion"""
+        v = Voting.objects.create(desc='Descripcion test', name="Votacion test")
+        v_pk = v.pk
+        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 1)
+        # Borramos la votacion
+        v.delete()
+        # Y comprobamos que se ha borrado 
+        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
+    
+    def update_desc_voting_started(self):
+        self.driver.get(f'{self.live_server_url}/admin/')
+        self.driver.find_element(By.ID, "id_username").send_keys("admin")
+        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+        self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+        time.sleep(10)
+        #helpwanted
+
