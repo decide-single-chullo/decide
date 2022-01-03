@@ -288,4 +288,4 @@ class VotingTestCase(BaseTestCase):
         tally = v.tally
         tally.sort()
         tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
-        self.assertEquals(v.total_votes, 100)
+        self.assertEquals(v.total_votes, len(clear))
