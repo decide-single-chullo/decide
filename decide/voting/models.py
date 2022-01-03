@@ -67,7 +67,8 @@ class Voting(models.Model):
         #get census porcentage
         census = mods.get('census', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
         census_number = census.get('voters')
-        self.census_total = 100 * self.total_votes/len(census_number)
+        if len(census_number) != 0:
+            self.census_total = 100 * self.total_votes/len(census_number)
         # anon votes
         return [[i['a'], i['b']] for i in votes]
         
