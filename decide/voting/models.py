@@ -75,7 +75,7 @@ class Voting(models.Model):
         # anon votes
         return [[i['a'], i['b']] for i in votes]
 
-    def tally_votes(self,token='',user):
+    def tally_votes(self,user,token=''):
         '''
         The tally is a shuffle and then a decrypt
         '''
