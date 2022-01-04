@@ -203,7 +203,7 @@ TEMPLATE_DIRS = ('/home/egc/decideChullo/decide/voting/templates',)
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = config('USER_MAIL')
-EMAIL_HOST_PASSWORD = config('USER_MAIL_PASSWORD')
+EMAIL_HOST_USER = 'recuentovotosdecide@gmail.com'
+EMAIL_HOST_PASSWORD = 'egc2021A!'
 EMAIL_PORT = 587
 
