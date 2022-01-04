@@ -388,12 +388,21 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         v.delete()
         # Y comprobamos que se ha borrado 
         self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
+
+    def crear_votacion(self):
+        self.driver.get(f'{self.live_server_url}/admin/')
+        self.driver.find_element(By.ID, "id_username").send_keys("admin")
+        self.driver.find_element(By.ID, "id_password").send_keys("decideegc")
+        self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+        #time.sleep(15)
+        #helpwanted
+        
     
     def update_desc_voting_started(self):
         self.driver.get(f'{self.live_server_url}/admin/')
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        time.sleep(10)
+        #time.sleep(10)
         #helpwanted
 
