@@ -394,7 +394,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("decideegc")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        #time.sleep(15)
+        time.sleep(15) #para ver la situación del test
         #helpwanted
         
     
@@ -403,6 +403,6 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        #time.sleep(10)
+        time.sleep(10) #para ver la situación del test
         #helpwanted
 
