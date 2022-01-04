@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}
+Cargar censo
+{% endblock %}
+{% block content %}
+  <form action="" method="POST" class="ui form" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit" class="ui button primary">Confirmar</button>
+  </form> 
+{% endblock %}

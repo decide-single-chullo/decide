@@ -5,6 +5,7 @@ from base.models import BigBigField
 class Vote(models.Model):
     voting_id = models.PositiveIntegerField()
     voter_id = models.PositiveIntegerField()
+    question_id = models.PositiveIntegerField()
 
     a = BigBigField()
     b = BigBigField()

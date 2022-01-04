@@ -5,15 +5,16 @@ from django.dispatch import receiver
 from django.template.loader import get_template
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
-
+from django.core.exceptions import ValidationError
 
 from base import mods
 from base.models import Auth, Key
 
+import datetime
 
 
 class Question(models.Model):
-    desc = models.TextField()
+    desc = models.TextField(unique = True)
 
     def __str__(self):
         return self.desc
@@ -34,9 +35,9 @@ class QuestionOption(models.Model):
 
 
 class Voting(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
     desc = models.TextField(blank=True, null=True)
-    question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
+    question = models.ManyToManyField(Question, related_name='voting')
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -46,7 +47,13 @@ class Voting(models.Model):
 
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
-     
+
+    def clean(self):
+        
+        if isinstance(self.start_date,datetime.datetime):
+            raise ValidationError('Voting started cannot be updated.')
+
+            
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
             return
@@ -68,7 +75,7 @@ class Voting(models.Model):
         # anon votes
         return [[i['a'], i['b']] for i in votes]
 
-    def tally_votes(self,user, token=''):
+    def tally_votes(self,token='',user):
         '''
         The tally is a shuffle and then a decrypt
         '''
@@ -105,19 +112,23 @@ class Voting(models.Model):
 
     def do_postproc(self,user):
         tally = self.tally
-        options = self.question.options.all()
-
+        questions = self.question.all()
         opts = []
-        for opt in options:
-            if isinstance(tally, list):
-                votes = tally.count(opt.number)
-            else:
-                votes = 0
-            opts.append({
-                'option': opt.option,
-                'number': opt.number,
-                'votes': votes
-            })
+        
+        for q in questions:
+            options = q.options.all()
+            for opt in options:
+                if isinstance(tally, list):
+                    votes = tally.count(opt.number)
+                else:
+                    votes = 0
+                opts.append({
+                    'question': opt.question.desc,
+                    'question_id':opt.question.id,
+                    'option': opt.option,
+                    'number': opt.number,
+                    'votes': votes
+                })
 
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)

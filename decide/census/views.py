@@ -11,8 +11,13 @@ from rest_framework.status import (
 )
 
 from base.perms import UserIsStaff
-from .models import Census
-
+from .models import Census, Csv
+from .forms import CsvModelForm
+from django.shortcuts import render
+from voting.models import Voting
+from django.contrib.auth.models import User
+import csv
+import os
 
 class CensusCreate(generics.ListCreateAPIView):
     permission_classes = (UserIsStaff,)
@@ -49,3 +54,34 @@ class CensusDetail(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             return Response('Invalid voter', status=ST_401)
         return Response('Valid voter')
+
+def upload_file_view(request):
+    form = CsvModelForm(request.POST or None, request.FILES or None)
+    if form.is_valid():
+        form.save()
+        form = CsvModelForm()
+        obj = Csv.objects.get(activated=False)
+        with open(obj.file_name.path, 'r') as f:
+            reader = csv.reader(f)
+
+            for i, row in enumerate(reader):
+                
+                if i==0:
+                    pass
+                else:
+                    bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
+                    if bool:
+                        pass
+                    elif not Voting.objects.filter(id=row[0]).exists():
+                        pass
+                    elif not User.objects.filter(id=row[1]).exists():
+                        pass
+                    else:
+                        # print(row)
+                        census = Census(voting_id=row[0], voter_id=row[1])
+                        census.save()
+
+            obj.activated = True
+            obj.save()
+        os.remove(obj.file_name.path)
+    return render(request, 'census/upload.html', {'form': form})

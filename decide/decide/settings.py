@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 
 import os
 import django_heroku
-import decouple
 from decouple import config
 
 
@@ -75,19 +74,9 @@ MODULES = [
     'voting',
 ]
 
-BASEURL = 'https://chullo2021.herokuapp.com'
+BASEURL = 'https://localhost:8000'
 
-APIS = {
-    'authentication': 'https://chullo2021.herokuapp.com',
-    'base': 'https://chullo2021.herokuapp.com',
-    'booth': 'https://chullo2021.herokuapp.com',
-    'census': 'https://chullo2021.herokuapp.com',
-    'mixnet': 'https://chullo2021.herokuapp.com',
-    'postproc': 'https://chullo2021.herokuapp.com',
-    'store': 'https://chullo2021.herokuapp.com',
-    'visualizer': 'https://chullo2021.herokuapp.com',
-    'voting': 'https://chullo2021.herokuapp.com',
-}
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -195,15 +184,13 @@ if os.path.exists("config.jsonnet"):
     for k, v in config.items():
         vars()[k] = v
 
-
 INSTALLED_APPS = INSTALLED_APPS + MODULES
 django_heroku.settings(locals()) 
 
-TEMPLATE_DIRS = ('/home/egc/decideChullo/decide/voting/templates',)
+TEMPLATE_DIRS = ('/decide/voting/templates',)
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = config('USER_MAIL')
 EMAIL_HOST_PASSWORD = config('USER_MAIL_PASSWORD')
 EMAIL_PORT = 587
-

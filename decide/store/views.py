@@ -26,7 +26,8 @@ class StoreView(generics.ListAPIView):
         """
          * voting: id
          * voter: id
-         * vote: { "a": int, "b": int }
+         * question: id
+         * vote: [{ "a": int, "b": int }, { "a": int, "b": int }, ...]
         """
 
         vid = request.data.get('voting')
@@ -42,8 +43,9 @@ class StoreView(generics.ListAPIView):
 
         uid = request.data.get('voter')
         vote = request.data.get('vote')
+        question = request.data.get('question')
 
-        if not vid or not uid or not vote:
+        if not vid or not uid or not vote or not question:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
 
         # validating voter
@@ -62,8 +64,7 @@ class StoreView(generics.ListAPIView):
         b = vote.get("b")
 
         defs = { "a": a, "b": b }
-        v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid,
-                                          defaults=defs)
+        v, _ = Vote.objects.get_or_create(voting_id=vid, voter_id=uid, question_id =question,defaults=defs)
         v.a = a
         v.b = b
 
