@@ -26,6 +26,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 
+
 class VotingTestCase(BaseTestCase):
 
     def setUp(self):
@@ -190,6 +191,8 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 400) #Analizar porqué no da 201
 
+#   Api test with fail (data)
+
     def test_create_withoutName_API_Fail(self):
         self.login()
 
@@ -215,6 +218,8 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 400)
     
+#   Api test with fail (data)
+
     def test_create_withoutQuestion_API_Fail(self):
         self.login()
 
@@ -346,7 +351,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = False
+        options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -388,12 +393,104 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         v.delete()
         # Y comprobamos que se ha borrado 
         self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
-    
-    def update_desc_voting_started(self):
+
+    def crear_votacion(self):
         self.driver.get(f'{self.live_server_url}/admin/')
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        time.sleep(10)
-        #helpwanted
 
+        self.driver.find_element(By.CSS_SELECTOR, ".model-auth .addlink").click()
+        self.driver.find_element(By.ID, "id_name").send_keys("localhost")
+        self.driver.find_element(By.ID, "id_url").send_keys("http://localhost:8000")
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.LINK_TEXT, "Home").click()
+
+        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
+        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
+        self.driver.find_element(By.ID, "id_options-0-number").click()
+        self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+        self.driver.find_element(By.ID, "id_options-0-option").click()
+        self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
+        self.driver.find_element(By.ID, "id_options-1-number").click()
+        self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+        self.driver.find_element(By.ID, "id_options-1-option").click()
+        self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.LINK_TEXT, "Home").click()
+
+        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
+        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta 2 votación")
+        self.driver.find_element(By.ID, "id_options-0-number").click()
+        self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+        self.driver.find_element(By.ID, "id_options-0-option").click()
+        self.driver.find_element(By.ID, "id_options-0-option").send_keys("C")
+        self.driver.find_element(By.ID, "id_options-1-number").click()
+        self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+        self.driver.find_element(By.ID, "id_options-1-option").click()
+        self.driver.find_element(By.ID, "id_options-1-option").send_keys("D")
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.LINK_TEXT, "Home").click()
+        
+        self.driver.find_element(By.CSS_SELECTOR, ".model-voting .addlink").click()
+        self.driver.find_element(By.ID, "id_name").send_keys("Votación 1")
+        self.driver.find_element(By.ID, "id_desc").send_keys("Votación prueba")
+
+        dropdown = self.driver.find_element(By.ID, "id_question")
+        dropdown.find_element(By.XPATH, "//option[. = 'Pregunta votación']").click()
+
+        dropdown = self.driver.find_element(By.ID, "id_auths")
+        dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
+
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.LINK_TEXT, "Home").click()
+        
+    def test_update_desc_voting_started(self):
+        
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.find_element(By.LINK_TEXT, "Votación 1").click()
+        self.driver.find_element(By.ID, "id_name").click()
+
+        self.driver.find_element(By.ID, "id_desc").send_keys("Votación prueba editada")
+        self.driver.find_element(By.NAME, "_save").click()
+
+        assert self.driver.find_element(By.CSS_SELECTOR, ".errornote").text == "Please correct the error below."
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.LINK_TEXT, "Votación 1").click()
+        assert self.driver.find_element(By.ID, "id_desc").text == "Votación prueba"
+
+    def test_update_question_v_started(self):
+
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+        
+        self.driver.find_element(By.LINK_TEXT, "Voting").click()
+        self.driver.find_element(By.LINK_TEXT, "Questions").click()
+        self.driver.find_element(By.LINK_TEXT, "Pregunta votación").click()
+
+        self.driver.find_element(By.ID, "id_desc").send_keys(" EDICIÓN EN LA DESCRIPCIÓN")
+        self.driver.find_element(By.NAME, "_save").click()
+        self.driver.find_element(By.ID, "content").click()
+        assert self.driver.find_element(By.CSS_SELECTOR, ".errornote").text == "Please correct the error below."
+        time.sleep(5)
+
+        self.driver.find_element(By.LINK_TEXT, "Questions").click()
+        self.driver.find_element(By.LINK_TEXT, "Pregunta votación").click()
+
+        assert self.driver.find_element(By.ID, "id_desc").text == "Pregunta votación"

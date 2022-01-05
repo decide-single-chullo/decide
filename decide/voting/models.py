@@ -19,6 +19,14 @@ class Question(models.Model):
     def __str__(self):
         return self.desc
 
+    def clean(self):
+        votings = Voting.objects.all()
+        for v in votings:
+            if isinstance(v.start_date,datetime.datetime):
+                for q in v.question.all():
+                    if self.pk == q.pk:
+                        raise ValidationError('This question cannot be updated because it is part of a started voting')
+
 
 class QuestionOption(models.Model):
     question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)

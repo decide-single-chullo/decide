@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.contrib import messages
 from .models import QuestionOption
 from .models import Question
 from .models import Voting
 from census.models import Census
+
+import datetime
 
 
 from .filters import StartedFilter
@@ -45,7 +48,20 @@ class QuestionOptionInline(admin.TabularInline):
 
 class QuestionAdmin(admin.ModelAdmin):
     inlines = [QuestionOptionInline]
+    actions = ['delete_selected']
 
+    def delete_selected(self,request,obj):
+        for o in obj.all():
+            i=0
+            votings = Voting.objects.all()
+            for v in votings:
+                if isinstance(v.start_date,datetime.datetime):
+                    if v.question.filter(id = o.id):
+                            i+=1
+            if i==0:
+                o.delete()
+            else:
+                messages.add_message(request, messages.ERROR, "This question cannot be deleted because it is part of a started voting")
 
 class VotingAdmin(admin.ModelAdmin):
     list_display = ('name', 'start_date', 'end_date')
