@@ -61,25 +61,29 @@ def upload_file_view(request):
         form.save()
         form = CsvModelForm()
         obj = Csv.objects.get(activated=False)
-        with open(obj.file_name.path, 'r') as f:
-            reader = csv.reader(f)
+        var = '.csv' not in str(obj.file_name)
+        if var:
+            pass
+        else:
+            with open(obj.file_name.path, 'r') as f:
+                reader = csv.reader(f)
 
-            for i, row in enumerate(reader):
-                
-                if i==0:
-                    pass
-                else:
-                    bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
-                    if bool:
-                        pass
-                    elif not Voting.objects.filter(id=row[0]).exists():
-                        pass
-                    elif not User.objects.filter(id=row[1]).exists():
+                for i, row in enumerate(reader):
+                    
+                    if i==0:
                         pass
                     else:
-                        # print(row)
-                        census = Census(voting_id=row[0], voter_id=row[1])
-                        census.save()
+                        bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
+                        if bool:
+                            pass
+                        elif not Voting.objects.filter(id=row[0]).exists():
+                            pass
+                        elif not User.objects.filter(id=row[1]).exists():
+                            pass
+                        else:
+                            # print(row)
+                            census = Census(voting_id=row[0], voter_id=row[1])
+                            census.save()
 
             obj.activated = True
             obj.save()
