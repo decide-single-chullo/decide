@@ -24,7 +24,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
+
 
 
 class VotingTestCase(BaseTestCase):
@@ -488,6 +488,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "_save").click()
         self.driver.find_element(By.ID, "content").click()
         assert self.driver.find_element(By.CSS_SELECTOR, ".errornote").text == "Please correct the error below."
+        time.sleep(5)
 
         self.driver.find_element(By.LINK_TEXT, "Questions").click()
         self.driver.find_element(By.LINK_TEXT, "Pregunta votación").click()
