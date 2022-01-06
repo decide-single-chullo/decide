@@ -351,7 +351,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = True
+        options.headless = False
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -370,7 +370,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         #In case of a correct loging, a element with id 'user-tools' is shown in the upper right part
         self.assertTrue(len(self.driver.find_elements_by_id('user-tools'))==1)
 
-    def test_update_voting(self):
+    def update_voting(self):
         """test: se puede actualizar una votacion."""
         v = Voting.objects.create(desc='Una votación', name="Votación")
         self.assertEqual(v.name, 'Votación')
@@ -380,7 +380,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         v.desc='Se actualizó la descripción'
         v.save()
         # Y vemos que se han aplicado los cambios
-        self.assertEqual(v.name, 'Se actualizó el nombre',)
+        self.assertEqual(v.name, 'Se actualizó el nombre')
         self.assertEqual(v.desc, 'Se actualizó la descripción')
         v.delete()
 
