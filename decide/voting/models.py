@@ -2,9 +2,15 @@ from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import get_template
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.core.exceptions import ValidationError
 
 from base import mods
 from base.models import Auth, Key
+
+import datetime
 
 
 class Question(models.Model):
@@ -12,6 +18,14 @@ class Question(models.Model):
 
     def __str__(self):
         return self.desc
+
+    def clean(self):
+        votings = Voting.objects.all()
+        for v in votings:
+            if isinstance(v.start_date,datetime.datetime):
+                for q in v.question.all():
+                    if self.pk == q.pk:
+                        raise ValidationError('This question cannot be updated because it is part of a started voting')
 
 
 class QuestionOption(models.Model):
@@ -44,6 +58,12 @@ class Voting(models.Model):
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    def clean(self):
+        
+        if isinstance(self.start_date,datetime.datetime):
+            raise ValidationError('Voting started cannot be updated.')
+
+            
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
             return
@@ -73,7 +93,7 @@ class Voting(models.Model):
         return [[i['a'], i['b']] for i in votes]
         
 
-    def tally_votes(self, token=''):
+    def tally_votes(self,user,token=''):
         '''
         The tally is a shuffle and then a decrypt
         '''
@@ -105,9 +125,10 @@ class Voting(models.Model):
         self.tally = response.json()
         self.save()
 
-        self.do_postproc()
+        self.do_postproc(user)
 
-    def do_postproc(self):
+
+    def do_postproc(self,user):
         tally = self.tally
         questions = self.question.all()
         opts = []
@@ -132,6 +153,23 @@ class Voting(models.Model):
 
         self.postproc = postp
         self.save()
+
+        template = get_template('count.html')
+        content = template.render({'username': user.username,'votos': votes})
+
+        message = EmailMultiAlternatives(
+            subject='Recuento de votos',
+            body='',
+            from_email=settings.EMAIL_HOST_USER,
+            to=[
+                user.email
+            ],
+            cc=[]
+        )
+
+        message.attach_alternative(content, 'text/html')
+        message.send()
+        
 
     def __str__(self):
         return self.name
