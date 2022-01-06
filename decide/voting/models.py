@@ -46,6 +46,8 @@ class Voting(models.Model):
     name = models.CharField(max_length=200, unique=True)
     desc = models.TextField(blank=True, null=True)
     question = models.ManyToManyField(Question, related_name='voting')
+    total_votes = models.PositiveIntegerField(default=0)
+    census_total = models.DecimalField(default=0.0,max_digits=5,decimal_places=2)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -80,8 +82,16 @@ class Voting(models.Model):
     def get_votes(self, token=''):
         # gettings votes from store
         votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        #count votes
+        self.total_votes = len(votes)
+        #get census porcentage
+        census = mods.get('census', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        census_number = census.get('voters')
+        if len(census_number) != 0:
+            self.census_total = 100 * self.total_votes/len(census_number)
         # anon votes
         return [[i['a'], i['b']] for i in votes]
+        
 
     def tally_votes(self,user,token=''):
         '''
