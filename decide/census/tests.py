@@ -100,6 +100,7 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
         self.driver.get(f'{self.live_server_url}/census/upload')  
         self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test_empty.csv")
         self.driver.find_element_by_id('confirmar').click()
+        time.sleep(1)
 
         assert self.driver.find_element_by_xpath("//*[contains(text(), 'The submitted file is empty.')]").text == 'The submitted file is empty.'
 
