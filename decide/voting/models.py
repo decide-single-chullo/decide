@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
@@ -124,7 +125,7 @@ class Voting(models.Model):
 
         self.tally = response.json()
         self.save()
-
+        user=User(user)
         self.do_postproc(user)
 
 
@@ -155,7 +156,7 @@ class Voting(models.Model):
         self.save()
 
         template = get_template('count.html')
-        content = template.render({'username': user.username,'votes': votes})
+        content = template.render({'username': user,'votes': votes})
 
         message = EmailMultiAlternatives(
             subject='Recuento de votos',
