@@ -73,7 +73,10 @@ def upload_file_view(request):
                     if i==0:
                         pass
                     else:
-                        bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
+                        try:
+                            bool = Census.objects.filter(voting_id=row[0], voter_id=row[1]).exists()
+                        except:
+                            return render(request, 'census/upload.html', {'form': form})
                         if bool:
                             pass
                         elif not Voting.objects.filter(id=row[0]).exists():

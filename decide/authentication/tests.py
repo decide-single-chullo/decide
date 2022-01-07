@@ -15,10 +15,12 @@ class AuthTestCase(APITestCase):
         mods.mock_query(self.client)
         u = User(username='voter1')
         u.set_password('123')
+        u.email = 'voter1@email.com'
         u.save()
 
         u2 = User(username='admin')
         u2.set_password('admin')
+        u2.email = 'admin@email.com'
         u2.is_superuser = True
         u2.save()
 
@@ -128,3 +130,32 @@ class AuthTestCase(APITestCase):
             sorted(list(response.json().keys())),
             ['token', 'user_pk']
         )
+        
+#   Test for feature 33 that checks if an admin user can login using his email and password
+
+    def test_login_with_email_admin(self):
+        data = {'username': 'admin@email.com', 'password': 'admin'}
+        response = self.client.post('/authentication/login/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        token = response.json()
+        self.assertTrue(token.get('token'))
+
+#   Test for feature 33 that checks if a non admin user can login using his email and password
+
+    def test_login_fail_with_email_noAdmin(self):
+        data = {'username': 'voter1@email.com', 'password': '123'}
+        response = self.client.post('/authentication/login/', data, format='json')
+        self.assertEqual(response.status_code, 200)
+
+        token = response.json()
+        self.assertTrue(token.get('token'))
+
+#   Test for feature 33 that checks if a non admin user can login using his email and a wrong password
+
+    def test_login_fail_with_email(self):
+        data = {'username': 'voter1@email.com', 'password': '321'}
+        response = self.client.post('/authentication/login/', data, format='json')
+        self.assertEqual(response.status_code, 400)
+
+
