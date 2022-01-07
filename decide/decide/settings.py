@@ -1,4 +1,3 @@
-
 """
 Django settings for decide project.
 
@@ -12,9 +11,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-import django_heroku
 from decouple import config
-
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -60,6 +57,7 @@ REST_FRAMEWORK = {
 
 AUTHENTICATION_BACKENDS = [
     'base.backends.AuthBackend',
+    'authentication.backends.EmailAuthBackend',
 ]
 
 MODULES = [
@@ -185,7 +183,6 @@ if os.path.exists("config.jsonnet"):
         vars()[k] = v
 
 INSTALLED_APPS = INSTALLED_APPS + MODULES
-django_heroku.settings(locals()) 
 
 TEMPLATE_DIRS = ('/decide/voting/templates',)
 EMAIL_USE_TLS = True

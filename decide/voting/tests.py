@@ -341,6 +341,25 @@ class VotingTestCase(BaseTestCase):
         # self.assertEqual(response.status_code, 400)
         # self.assertEqual(response.json(), 'Voting already tallied')
 
+
+#   Test for feature 01 that test the count of the votes is correct
+    def test_count_votes(self):
+        v = self.create_voting('vot4')
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        tally = v.tally
+        tally.sort()
+        tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
+        self.assertEquals(v.total_votes, len(clear))
 #   Test view with selenium
 
 class SeleniumVotingTestCase(StaticLiveServerTestCase):
@@ -495,6 +514,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
 
         assert self.driver.find_element(By.ID, "id_desc").text == "Pregunta votación"
 
+
     def test_delete_question_of_started_voting(self):
        
        self.driver.get(f'{self.live_server_url}/admin/')
@@ -551,3 +571,4 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
        self.driver.find_element_by_class_name("button").click()
 
        assert self.driver.find_element_by_class_name("error").text == 'This question cannot be deleted because it is part of a started voting'
+
