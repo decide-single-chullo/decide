@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.postgres import fields
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -58,6 +59,9 @@ def send_message(v,tally):
 
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
+
+    fields = ('number','option')
+    readonly_fields = ('number',)
 
 
 class QuestionAdmin(admin.ModelAdmin):
