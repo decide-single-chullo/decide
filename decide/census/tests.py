@@ -86,7 +86,7 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = True
+        options.headless = False
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -171,3 +171,33 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
         self.assertEqual(Census.objects.count(), 0)
         self.assertEqual(Csv.objects.count(), 1)
+    
+    def test_zno_sense_csv(self):                    
+        self.driver.get(f'{self.live_server_url}/census/upload')  
+        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test_no_sense.csv")
+        self.driver.find_element_by_id('confirmar').click()
+        # time.sleep(30)
+
+        self.assertEqual(Census.objects.count(), 0)
+        self.assertEqual(Csv.objects.count(), 1)
+
+    def test_zdelete_csv(self):                    
+        self.driver.get(f'{self.live_server_url}/census/upload')  
+        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test.txt")
+        self.driver.find_element_by_id('confirmar').click()
+
+        self.assertEqual(Census.objects.count(), 0)
+        self.assertEqual(Csv.objects.count(), 1)
+
+        self.driver.get(f'{self.live_server_url}/admin/')  
+        self.driver.find_element_by_name('username').send_keys("admin")
+        self.driver.find_element_by_name('password').send_keys("qwerty",Keys.ENTER) 
+
+        self.driver.find_element_by_xpath("//*[contains(text(), 'Csvs')]").click()
+        self.driver.find_element_by_class_name("action-select").click()
+        self.driver.find_element_by_name("action").click()
+        self.driver.find_element_by_xpath("//*[contains(text(), 'Delete selected csvs')]").click()
+        self.driver.find_element_by_class_name("button").click()
+        self.driver.find_element_by_xpath("//input[@type='submit']").click()
+
+        self.assertEqual(Csv.objects.count(), 0)
