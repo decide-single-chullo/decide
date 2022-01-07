@@ -351,7 +351,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = False
+        options.headless = True
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -494,3 +494,60 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.LINK_TEXT, "Pregunta votación").click()
 
         assert self.driver.find_element(By.ID, "id_desc").text == "Pregunta votación"
+
+    def test_delete_question_of_started_voting(self):
+       
+       self.driver.get(f'{self.live_server_url}/admin/')
+       self.driver.find_element(By.ID, "id_username").send_keys("admin")
+       self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+       self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+
+       self.driver.find_element(By.CSS_SELECTOR, ".model-auth .addlink").click()
+       self.driver.find_element(By.ID, "id_name").send_keys("localhost")
+       self.driver.find_element(By.ID, "id_url").send_keys("http://localhost:8000")
+       self.driver.find_element(By.NAME, "_save").click()
+       self.driver.find_element(By.LINK_TEXT, "Home").click()
+
+       self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
+       self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
+       self.driver.find_element(By.ID, "id_options-0-number").click()
+       self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+       self.driver.find_element(By.ID, "id_options-0-option").click()
+       self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
+       self.driver.find_element(By.ID, "id_options-1-number").click()
+       self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+       self.driver.find_element(By.ID, "id_options-1-option").click()
+       self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
+       self.driver.find_element(By.NAME, "_save").click()
+       self.driver.find_element(By.LINK_TEXT, "Home").click()
+        
+       self.driver.find_element(By.CSS_SELECTOR, ".model-voting .addlink").click()
+       self.driver.find_element(By.ID, "id_name").send_keys("Votación 1")
+       self.driver.find_element(By.ID, "id_desc").send_keys("Votación prueba")
+
+       dropdown = self.driver.find_element(By.ID, "id_question")
+       dropdown.find_element(By.XPATH, "//option[. = 'Pregunta votación']").click()
+
+       dropdown = self.driver.find_element(By.ID, "id_auths")
+       dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
+
+       self.driver.find_element(By.NAME, "_save").click()
+       self.driver.find_element(By.LINK_TEXT, "Home").click()
+
+       self.driver.find_element(By.LINK_TEXT, "Votings").click() 
+       self.driver.find_element(By.ID, "action-toggle").click()
+       self.driver.find_element(By.NAME, "action").click()
+       dropdown = self.driver.find_element(By.NAME, "action")
+       dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+       self.driver.find_element(By.NAME, "action").click()
+       self.driver.find_element(By.NAME, "index").click()
+        
+       self.driver.find_element(By.LINK_TEXT, "Voting").click()
+       self.driver.find_element(By.LINK_TEXT, "Questions").click()
+
+       self.driver.find_element_by_class_name("action-select").click()
+       self.driver.find_element_by_name("action").click()
+       self.driver.find_element_by_xpath("//*[contains(text(), 'Delete selected')]").click()
+       self.driver.find_element_by_class_name("button").click()
+
+       assert self.driver.find_element_by_class_name("error").text == 'This question cannot be deleted because it is part of a started voting'
