@@ -14,10 +14,12 @@ class BaseTestCase(APITestCase):
 
         user_noadmin = User(username='noadmin', first_name='noadmin', last_name='last_name_noadmin')
         user_noadmin.set_password('qwerty')
+        user_noadmin.email = "noadmin@email.com"
         user_noadmin.save()
 
         user_admin = User(username='admin', is_staff=True,  is_superuser=True, first_name='admin', last_name='last_name_admin') 
         user_admin.set_password('qwerty')
+        user_admin.email = "admin@email.com"
         user_admin.save()
 
     def tearDown(self):
