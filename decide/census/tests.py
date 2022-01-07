@@ -86,7 +86,7 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = True
+        options.headless = False
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -118,12 +118,10 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
-       self.driver.find_element(By.ID, "id_options-0-number").click()
-       self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+
        self.driver.find_element(By.ID, "id_options-0-option").click()
        self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
-       self.driver.find_element(By.ID, "id_options-1-number").click()
-       self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+
        self.driver.find_element(By.ID, "id_options-1-option").click()
        self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
        self.driver.find_element(By.NAME, "_save").click()
@@ -131,12 +129,10 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta 2 votación")
-       self.driver.find_element(By.ID, "id_options-0-number").click()
-       self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+
        self.driver.find_element(By.ID, "id_options-0-option").click()
        self.driver.find_element(By.ID, "id_options-0-option").send_keys("C")
-       self.driver.find_element(By.ID, "id_options-1-number").click()
-       self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+
        self.driver.find_element(By.ID, "id_options-1-option").click()
        self.driver.find_element(By.ID, "id_options-1-option").send_keys("D")
        self.driver.find_element(By.NAME, "_save").click()
