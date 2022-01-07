@@ -414,17 +414,17 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
 
     def crear_votacion(self):
-        self.driver.get(f'{self.live_server_url}/admin/')
+        base_url = f'{self.live_server_url}'
+        self.driver.get(base_url + '/admin/')
         self.driver.find_element(By.ID, "id_username").send_keys("admin")
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-
+        
         self.driver.find_element(By.CSS_SELECTOR, ".model-auth .addlink").click()
         self.driver.find_element(By.ID, "id_name").send_keys("localhost")
-        self.driver.find_element(By.ID, "id_url").send_keys("http://localhost:8000")
+        self.driver.find_element(By.ID, "id_url").send_keys(base_url)
         self.driver.find_element(By.NAME, "_save").click()
         self.driver.find_element(By.LINK_TEXT, "Home").click()
-
         self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
         self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
         self.driver.find_element(By.ID, "id_options-0-number").click()
@@ -459,7 +459,8 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         dropdown.find_element(By.XPATH, "//option[. = 'Pregunta votación']").click()
 
         dropdown = self.driver.find_element(By.ID, "id_auths")
-        dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
+        ath =  "//option[. = '"+base_url+ "']"
+        dropdown.find_element(By.XPATH, ath).click()
 
         self.driver.find_element(By.NAME, "_save").click()
         self.driver.find_element(By.LINK_TEXT, "Home").click()
@@ -513,6 +514,40 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.LINK_TEXT, "Pregunta votación").click()
 
         assert self.driver.find_element(By.ID, "id_desc").text == "Pregunta votación"
+
+
+    def test_mensaje_tally(self):
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/booth/1/1')
+        self.driver.find_element(By.ID, "username").send_keys("admin")
+        self.driver.find_element(By.ID, "password").send_keys("qwerty")
+        
+        self.driver.find_element(By.CSS_SELECTOR    , ".btn-primary").click()
+        self.driver.find_element(By.ID, "q1").click()
+        self.driver.find_element(By.ID, "voteBtn").click()
+
+        self.driver.get(f'{self.live_server_url}/admin/voting/voting')
+
+        self.driver.find_element(By.ID, "action-toggle").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Stop']").click()
+        self.driver.find_element(By.NAME, "action").click() 
+
+        self.driver.find_element(By.NAME, "index").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Tally']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
 
 
     def test_delete_question_of_started_voting(self):
@@ -571,4 +606,5 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
        self.driver.find_element_by_class_name("button").click()
 
        assert self.driver.find_element_by_class_name("error").text == 'This question cannot be deleted because it is part of a started voting'
+
 

@@ -6,6 +6,7 @@ from .models import QuestionOption
 from .models import Question
 from .models import Voting
 from census.models import Census
+from django.contrib import messages
 
 import datetime
 
@@ -37,10 +38,23 @@ def tally(ModelAdmin, request, queryset):
     for v in queryset.filter(end_date__lt=timezone.now()):
         token = request.session.get('auth-token', '')
         v.tally_votes(request.user,token)
+        messages.info(request,send_message(v, v.tally))
         
 
  
-    
+def send_message(v,tally):
+    msg="The options that have received votes are the following: "
+    votos = tally
+    dicc = dict()
+    for voto in votos:
+        try:
+            i = dicc[voto]
+            dicc[voto] = i +1
+        except:
+            dicc.update({voto: 1})
+    for number in dicc:
+        msg = msg + "for option: " + QuestionOption.objects.get(number=number).option + " there has been " + str(dicc[number]) + " votes "
+    return msg    
 
 class QuestionOptionInline(admin.TabularInline):
     model = QuestionOption
