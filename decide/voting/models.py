@@ -138,6 +138,7 @@ class Voting(models.Model):
             for opt in options:
                 if isinstance(tally, list):
                     votes = tally.count(opt.number)
+                                        
                 else:
                     votes = 0
                 opts.append({
@@ -147,15 +148,14 @@ class Voting(models.Model):
                     'number': opt.number,
                     'votes': votes
                 })
-
+        votes= int(len(tally)/len(questions))
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)
-
         self.postproc = postp
         self.save()
 
         template = get_template('count.html')
-        content = template.render({'username': user.username,'votos': votes})
+        content = template.render({'username': user.username,'votes': votes})
 
         message = EmailMultiAlternatives(
             subject='Recuento de votos',
