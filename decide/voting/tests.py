@@ -127,7 +127,7 @@ class VotingTestCase(BaseTestCase):
         for q in v.postproc:
             self.assertEqual(tally.get(q["number"], 0), q["votes"])
 
-    
+
 #   Test for feature 05 that checks if when a voting is created the name is not already in other voting
 
     def test_create_voting_withUniqueName(self):
@@ -363,7 +363,7 @@ class VotingTestCase(BaseTestCase):
 
 #   Test view with selenium
 
-class VotingTestCase(StaticLiveServerTestCase):
+class SeleniumVotingTestCase(StaticLiveServerTestCase):
     
     def setUp(self):
         #Load base test functionality for decide
@@ -380,7 +380,7 @@ class VotingTestCase(StaticLiveServerTestCase):
         super().tearDown()
         self.driver.quit()
         self.base.tearDown()
-        
+   
     def test_simpleCorrectLogin(self):                    
         self.driver.get(f'{self.live_server_url}/admin/')  
         self.driver.find_element_by_id('id_username').send_keys("admin")
@@ -413,7 +413,7 @@ class VotingTestCase(StaticLiveServerTestCase):
         v.delete()
         # Y comprobamos que se ha borrado 
         self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
-    
+
     def crear_votacion(self):
         base_url = f'{self.live_server_url}'
         self.driver.get(base_url + '/admin/')
@@ -608,7 +608,7 @@ class VotingTestCase(StaticLiveServerTestCase):
 
        assert self.driver.find_element_by_class_name("error").text == 'This question cannot be deleted because it is part of a started voting'
 
-#   Test selenium voting using email to authenticate and vote. Issue 33.
+#   Test selenium voting using email to authenticate and vote. Issue 66 (Issue 33).
 
     def test_voting_using_email(self):
         self.crear_votacion()
@@ -632,5 +632,23 @@ class VotingTestCase(StaticLiveServerTestCase):
 
         assert self.driver.page_source.__contains__("Conglatulations. Your vote has been sent")
         self.driver.get(f'{self.live_server_url}/admin/voting/voting')
+    
+    def test_voting_using_email_fail(self):
+        self.crear_votacion()
 
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/booth/1/1')
+        self.driver.find_element(By.ID, "username").send_keys("admin@gmail.com")
+        self.driver.find_element(By.ID, "password").send_keys("qwerty")
+        
+        self.driver.find_element(By.CSS_SELECTOR    , ".btn-primary").click()
+        time.sleep(1)
+        assert self.driver.page_source.__contains__("Error: Bad Request")
         

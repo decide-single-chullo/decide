@@ -168,7 +168,7 @@ class AuthTestCase(APITestCase):
 
 #   Test view with selenium
 
-class AuthenticationTestCase(StaticLiveServerTestCase):
+class SeleniumAuthenticationTestCase(StaticLiveServerTestCase):
     
     def setUp(self):
         #Load base test functionality for decide
@@ -186,7 +186,7 @@ class AuthenticationTestCase(StaticLiveServerTestCase):
         self.driver.quit()
         self.base.tearDown()
 
-#   Test selenium to authenticate using email. Issue 33.
+#   Test selenium to authenticate using email. Issue 66 (Issue 33).
 
     def test_authentication_using_email(self):
         base_url = f'{self.live_server_url}'
@@ -197,4 +197,15 @@ class AuthenticationTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
         self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
         assert self.driver.page_source.__contains__("Site administration")
+
+    def test_authentication_using_email_fail(self):
+        base_url = f'{self.live_server_url}'
+
+        self.driver.get(base_url + '/admin/logout')
+        self.driver.get(base_url + '/admin/logout/?next=/admin/')
+        self.driver.find_element(By.ID, "id_username").send_keys("admin@gmail.com")
+        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+        self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+        assert self.driver.page_source.__contains__("Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive.")
+            
         
