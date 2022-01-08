@@ -119,6 +119,20 @@ class VotingTestCase(BaseTestCase):
         self.assertEqual(v.desc, 'Se actualizó la descripción')
         v.delete()
 
+    def test_update_voting_negative(self):
+        """test: se puede actualizar una votacion."""
+        v = Voting.objects.create(desc='Una votación', name="Votación")
+        self.assertEqual(v.name, 'Votación')
+        self.assertEqual(v.desc, 'Una votación')
+        v2 = Voting.objects.create(desc='Otra votación', name="Votación2")
+        self.assertEqual(v2.name, 'Votación2')
+        self.assertEqual(v2.desc, 'Otra votación')
+        # Actualizamos la votación
+        try:
+            v.name='Votación2'
+        except IntegrityError: 
+            self.assertRaises(IntegrityError)
+        
     def test_delete_voting(self):
         """test: se puede borrar una votacion"""
         v = Voting.objects.create(desc='Descripcion test', name="Votacion test")
