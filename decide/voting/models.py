@@ -133,12 +133,14 @@ class Voting(models.Model):
 
         self.tally = response.json()
         self.save()
-        print(user)
         usuario_salida=User(user)
-        usuario_salida.email=user.email
-        usuario_salida.username=user.username
+        try:
+            usuario_salida.email=user.email
+            usuario_salida.username=user.username
+        except:
+            usuario_salida.email=usuario_salida.email
+            usuario_salida.username=usuario_salida.username
         self.do_postproc(usuario_salida)
-
 
     def do_postproc(self,user):
         tally = self.tally
