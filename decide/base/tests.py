@@ -12,20 +12,22 @@ class BaseTestCase(APITestCase):
         self.token = None
         mods.mock_query(self.client)
 
-        user_noadmin = User(username='noadmin')
+        user_noadmin = User(username='noadmin', first_name='noadmin', last_name='last_name_noadmin')
         user_noadmin.set_password('qwerty')
+        user_noadmin.email = "noadmin@email.com"
         user_noadmin.save()
 
-        user_admin = User(username='admin', is_staff=True)
+        user_admin = User(username='admin', is_staff=True,  is_superuser=True, first_name='admin', last_name='last_name_admin', email='admin@gmail.com') 
         user_admin.set_password('qwerty')
+        user_admin.email = "admin@email.com"
         user_admin.save()
 
     def tearDown(self):
         self.client = None
         self.token = None
 
-    def login(self, user='admin', password='qwerty'):
-        data = {'username': user, 'password': password}
+    def login(self, user='admin', password='qwerty',email='admin@gmail.com'):
+        data = {'username': user, 'password': password, 'email': email}
         response = mods.post('authentication/login', json=data, response=True)
         self.assertEqual(response.status_code, 200)
         self.token = response.json().get('token')
