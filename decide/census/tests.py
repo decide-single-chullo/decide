@@ -1,16 +1,12 @@
-import random
-from django.contrib.auth.models import User
-from django.test import TestCase
-from rest_framework.test import APIClient
 
 from .models import Census, Csv
-from base import mods
 from base.tests import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
+import os
 
 class CensusTestCase(BaseTestCase):
 
@@ -86,7 +82,7 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
         self.base.setUp()
 
         options = webdriver.ChromeOptions()
-        options.headless = True
+        options.headless = False
         self.driver = webdriver.Chrome(options=options)
 
         super().setUp()    
@@ -98,7 +94,8 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
     
     def test_empty_csv(self):                    
         self.driver.get(f'{self.live_server_url}/census/upload')  
-        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test_empty.csv")
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_empty.csv")
         self.driver.find_element_by_id('confirmar').click()
         time.sleep(1)
 
@@ -118,12 +115,10 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
-       self.driver.find_element(By.ID, "id_options-0-number").click()
-       self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+
        self.driver.find_element(By.ID, "id_options-0-option").click()
        self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
-       self.driver.find_element(By.ID, "id_options-1-number").click()
-       self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+
        self.driver.find_element(By.ID, "id_options-1-option").click()
        self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
        self.driver.find_element(By.NAME, "_save").click()
@@ -131,12 +126,10 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta 2 votación")
-       self.driver.find_element(By.ID, "id_options-0-number").click()
-       self.driver.find_element(By.ID, "id_options-0-number").send_keys("1")
+
        self.driver.find_element(By.ID, "id_options-0-option").click()
        self.driver.find_element(By.ID, "id_options-0-option").send_keys("C")
-       self.driver.find_element(By.ID, "id_options-1-number").click()
-       self.driver.find_element(By.ID, "id_options-1-number").send_keys("2")
+
        self.driver.find_element(By.ID, "id_options-1-option").click()
        self.driver.find_element(By.ID, "id_options-1-option").send_keys("D")
        self.driver.find_element(By.NAME, "_save").click()
@@ -156,7 +149,8 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
        self.driver.find_element(By.LINK_TEXT, "Home").click()   
 
        self.driver.get(f'{self.live_server_url}/census/upload')  
-       self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test_full.csv")
+       ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+       self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_full.csv")
     #    time.sleep(55)
        self.driver.find_element_by_id('confirmar').click()
     #    time.sleep(55)
@@ -166,7 +160,8 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
 
     def test_not_csv(self):                    
         self.driver.get(f'{self.live_server_url}/census/upload')  
-        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test.txt")
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
         self.driver.find_element_by_id('confirmar').click()
 
         self.assertEqual(Census.objects.count(), 0)
@@ -174,7 +169,8 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
     
     def test_zno_sense_csv(self):                    
         self.driver.get(f'{self.live_server_url}/census/upload')  
-        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test_no_sense.csv")
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_no_sense.csv")
         self.driver.find_element_by_id('confirmar').click()
         # time.sleep(30)
 
@@ -182,8 +178,9 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
         self.assertEqual(Csv.objects.count(), 1)
 
     def test_zdelete_csv(self):                    
-        self.driver.get(f'{self.live_server_url}/census/upload')  
-        self.driver.find_element_by_id('id_file_name').send_keys("/home/pablo/decide/decide/census/csvs/test.txt")
+        self.driver.get(f'{self.live_server_url}/census/upload')
+        ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
         self.driver.find_element_by_id('confirmar').click()
 
         self.assertEqual(Census.objects.count(), 0)
