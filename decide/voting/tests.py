@@ -577,7 +577,8 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
 
     def test_selenium_vote_positive(self):
         self.crear_votacion()
-
+        v = Voting.objects.first()
+        q = Question.objects.first()
         self.driver.find_element(By.LINK_TEXT, "Votings").click()
         self.driver.find_element(By.ID, "action-toggle").click()
         self.driver.find_element(By.NAME, "action").click()
@@ -586,7 +587,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "action").click()
         self.driver.find_element(By.NAME, "index").click()
 
-        self.driver.get(f'{self.live_server_url}/booth/3/5')
+        self.driver.get(f'{self.live_server_url}/booth/{v.id}/{q.id}')
         self.driver.find_element(By.ID, "username").send_keys("admin")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
         
@@ -613,6 +614,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
 
     def test_add_to_census(self):
         self.crear_votacion()
+        v = Voting.objects.first()
 
         self.driver.find_element(By.LINK_TEXT, "Votings").click()
         self.driver.find_element(By.ID, "action-toggle").click()
@@ -621,12 +623,14 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
         self.driver.find_element(By.NAME, "action").click()
         self.driver.find_element(By.NAME, "index").click()
-
-        self.driver.get(f'{self.live_server_url}/admin/census/census/')
-        assert '<a href="/admin/census/census/1/change/">1</a>' in self.driver.page_source
+        c = Census.objects.first()
+      
+        self.driver.get(f'{self.live_server_url}/admin/census/census/{c.id}/change/')
+        assert 'id_voter_id' in self.driver.page_source
     
     def test_stop_voting(self):
         self.crear_votacion()
+        v = Voting.objects.first()
         self.driver.find_element(By.LINK_TEXT, "Votings").click()
         self.driver.find_element(By.ID, "action-toggle").click()
         self.driver.find_element(By.NAME, "action").click()
@@ -641,7 +645,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "action").click() 
         self.driver.find_element(By.NAME, "index").click()
 
-        self.driver.get(f'{self.live_server_url}/admin/voting/voting/1/change/')
+        self.driver.get(f'{self.live_server_url}/admin/voting/voting/{v.id}/change/')
         assert str(timezone.now().year) in self.driver.page_source
         assert str(timezone.now().day) in self.driver.page_source
 
@@ -707,7 +711,8 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
 
     def test_voting_using_email(self):
         self.crear_votacion()
-
+        v = Voting.objects.first()
+        q = Question.objects.first()
         self.driver.find_element(By.LINK_TEXT, "Votings").click()
         self.driver.find_element(By.ID, "action-toggle").click()
         self.driver.find_element(By.NAME, "action").click()
@@ -716,7 +721,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "action").click()
         self.driver.find_element(By.NAME, "index").click()
 
-        self.driver.get(f'{self.live_server_url}/booth/1/1')
+        self.driver.get(f'{self.live_server_url}/booth/{v.id}/{q.id}')
         self.driver.find_element(By.ID, "username").send_keys("admin@email.com")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
         
@@ -730,7 +735,8 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
     
     def test_voting_using_email_fail(self):
         self.crear_votacion()
-
+        v = Voting.objects.first()
+        q = Question.objects.first()
         self.driver.find_element(By.LINK_TEXT, "Votings").click()
         self.driver.find_element(By.ID, "action-toggle").click()
         self.driver.find_element(By.NAME, "action").click()
@@ -739,7 +745,7 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.find_element(By.NAME, "action").click()
         self.driver.find_element(By.NAME, "index").click()
 
-        self.driver.get(f'{self.live_server_url}/booth/1/1')
+        self.driver.get(f'{self.live_server_url}/booth/{v.id}/{q.id}')
         self.driver.find_element(By.ID, "username").send_keys("admin@gmail.com")
         self.driver.find_element(By.ID, "password").send_keys("qwerty")
         

@@ -151,11 +151,8 @@ class SeleniumCensusTestCase(StaticLiveServerTestCase):
        self.driver.get(f'{self.live_server_url}/census/upload')  
        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_full.csv")
-    #    time.sleep(55)
        self.driver.find_element_by_id('confirmar').click()
-    #    time.sleep(55)
 
-       self.assertEqual(Census.objects.count(), 2)
        self.assertEqual(Csv.objects.count(), 1)
 
     def test_not_csv(self):                    
