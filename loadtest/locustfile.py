@@ -15,6 +15,12 @@ HOST = "http://localhost:8000"
 VOTING = 1
 
 
+class DefVoting(SequentialTaskSet):
+
+    @task
+    def index(self):
+        self.client.get("/voting")
+
 class DefVisualizer(TaskSet):
 
     @task
@@ -67,7 +73,11 @@ class Visualizer(HttpUser):
     tasks = [DefVisualizer]
     wait_time = between(3,5)
 
-
+#locust test for many GET voting petitions in the API rest
+class getVoting(HttpUser):
+    host = HOST
+    tasks = [DefVoting]
+    wait_time = between(2,4)
 
 class Voters(HttpUser):
     host = HOST
