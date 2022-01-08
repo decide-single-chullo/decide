@@ -1,17 +1,12 @@
-import random
-from django.contrib.auth.models import User
-from django.test import TestCase
-from rest_framework.test import APIClient
 
 from .models import Census, Csv
-from base import mods
 from base.tests import BaseTestCase
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-import sys,os
+import os
 
 class CensusTestCase(BaseTestCase):
 
