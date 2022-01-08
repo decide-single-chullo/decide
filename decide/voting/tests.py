@@ -552,6 +552,41 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         self.driver.get(f'{self.live_server_url}/booth/2/3')
         assert "The requested URL /booth/2/3/ was not found on this server." in self.driver.page_source
 
+    def test_add_to_census(self):
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/admin/census/census/')
+        assert '<a href="/admin/census/census/1/change/">1</a>' in self.driver.page_source
+    
+    def test_stop_voting(self):
+        self.crear_votacion()
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.find_element(By.ID, "action-toggle").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Stop']").click()
+        self.driver.find_element(By.NAME, "action").click() 
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/admin/voting/voting/1/change/')
+        assert str(timezone.now().year) in self.driver.page_source
+        assert str(timezone.now().day) in self.driver.page_source
+
+
     def test_mensaje_tally(self):
         self.crear_votacion()
 
