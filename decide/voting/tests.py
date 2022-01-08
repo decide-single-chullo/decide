@@ -516,6 +516,42 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         assert self.driver.find_element(By.ID, "id_desc").text == "Pregunta votación"
 
 
+    def test_selenium_vote_positive(self):
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/booth/3/5')
+        self.driver.find_element(By.ID, "username").send_keys("admin")
+        self.driver.find_element(By.ID, "password").send_keys("qwerty")
+        
+        self.driver.find_element(By.CSS_SELECTOR    , ".btn-primary").click()
+        time.sleep(2)
+        self.driver.find_element(By.ID, "q1").click()
+        self.driver.find_element(By.ID, "voteBtn").click()
+
+        assert "Conglatulations. Your vote has been sent" in self.driver.page_source
+
+    def test_selenium_vote_negative(self):
+        self.crear_votacion()
+
+        self.driver.find_element(By.LINK_TEXT, "Votings").click()
+        self.driver.find_element(By.ID, "action-toggle").click()
+        self.driver.find_element(By.NAME, "action").click()
+        dropdown = self.driver.find_element(By.NAME, "action")
+        dropdown.find_element(By.XPATH, "//option[. = 'Start']").click()
+        self.driver.find_element(By.NAME, "action").click()
+        self.driver.find_element(By.NAME, "index").click()
+
+        self.driver.get(f'{self.live_server_url}/booth/2/3')
+        assert "The requested URL /booth/2/3/ was not found on this server." in self.driver.page_source
+
     def test_mensaje_tally(self):
         self.crear_votacion()
 
