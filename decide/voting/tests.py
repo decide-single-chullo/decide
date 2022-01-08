@@ -233,6 +233,32 @@ class VotingTestCase(BaseTestCase):
         response = self.client.post('/voting/', data, format='json')
         self.assertEqual(response.status_code, 400)
 
+#   Api test with fail (data)
+
+    def test_create_withoutDesc_API_Fail(self):
+        self.login()
+
+        data = {
+        "name": "Prueba",
+        "desc": "",
+        "question": [
+            {
+                "desc": "pregunta 1",
+                "options": [
+                    {
+                        "number": 1,
+                        "option": "A"
+                    },
+                    {
+                        "number": 2,
+                        "option": "B"
+                    }
+                ]
+            }
+        ]
+    }   
+        response = self.client.post('/voting/', data, format='json')
+        self.assertEqual(response.status_code, 400)
 
 #   Test for feature 03 that checks if when a voting is started, all superusers are automatically added to the census of that voting
     def test_add_automatically_to_census_from_api(self):
@@ -362,6 +388,23 @@ class VotingTestCase(BaseTestCase):
         tally = {k: len(list(x)) for k, x in itertools.groupby(tally)}
 
         self.assertEquals(5, len(clear))
+    
+    def test_email_not_send(self):
+        v = self.create_voting('vot4')
+        self.create_voters(v)
+
+        v.create_pubkey()
+        v.start_date = timezone.now()
+        v.save()
+
+        clear = self.store_votes(v)
+
+        self.login()  # set token
+        v.tally_votes(self.token)
+
+        data = {'action': 'tally'}
+        response = self.client.put('/voting/{}/'.format(v.pk), data, format='json')
+        self.assertEquals(response.status_code, 400)
 
 #   Test view with selenium
 
