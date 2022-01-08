@@ -1,4 +1,5 @@
-from django.contrib.auth.models import User
+from re import U
+
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
@@ -8,10 +9,12 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import ValidationError
 
+
 from base import mods
 from base.models import Auth, Key
 
 import datetime
+from django.contrib.auth.models import User
 
 
 class Question(models.Model):
@@ -130,8 +133,11 @@ class Voting(models.Model):
 
         self.tally = response.json()
         self.save()
-        user=User(user)
-        self.do_postproc(user)
+        print(user)
+        usuario_salida=User(user)
+        usuario_salida.email=user.email
+        usuario_salida.username=user.username
+        self.do_postproc(usuario_salida)
 
 
     def do_postproc(self,user):
@@ -162,7 +168,7 @@ class Voting(models.Model):
 
         template = get_template('count.html')
         content = template.render({'username': user,'votes': votes})
-
+       
         message = EmailMultiAlternatives(
             subject='Recuento de votos',
             body='',
