@@ -13,4 +13,4 @@ django-heroku
 gunicorn
 python-decouple
 selenium
-
+locust
