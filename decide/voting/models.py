@@ -1,27 +1,50 @@
+from re import U
+
 from django.db import models
 from django.contrib.postgres.fields import JSONField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import get_template
+from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
+from django.core.exceptions import ValidationError
+
 
 from base import mods
 from base.models import Auth, Key
 
+import datetime
+from django.contrib.auth.models import User
+
 
 class Question(models.Model):
-    desc = models.TextField()
+    desc = models.TextField(unique = True)
 
     def __str__(self):
         return self.desc
 
+    def clean(self):
+        votings = Voting.objects.all()
+        for v in votings:
+            if isinstance(v.start_date,datetime.datetime):
+                for q in v.question.all():
+                    if self.pk == q.pk:
+                        raise ValidationError('This question cannot be updated because it is part of a started voting')
+
 
 class QuestionOption(models.Model):
     question = models.ForeignKey(Question, related_name='options', on_delete=models.CASCADE)
-    number = models.PositiveIntegerField(blank=True, null=True)
+    number = models.PositiveIntegerField(blank=True, null=True, unique = True)
     option = models.TextField()
 
     def save(self):
+        try:
+            last_number = QuestionOption.objects.count()
+        except:
+            last_number = 2
+            
         if not self.number:
-            self.number = self.question.options.count() + 2
+            self.number = last_number + 1
         return super().save()
 
     def __str__(self):
@@ -31,7 +54,9 @@ class QuestionOption(models.Model):
 class Voting(models.Model):
     name = models.CharField(max_length=200, unique=True)
     desc = models.TextField(blank=True, null=True)
-    question = models.ForeignKey(Question, related_name='voting', on_delete=models.CASCADE)
+    question = models.ManyToManyField(Question, related_name='voting')
+    total_votes = models.PositiveIntegerField(default=0)
+    census_total = models.DecimalField(default=0.0,max_digits=5,decimal_places=2)
 
     start_date = models.DateTimeField(blank=True, null=True)
     end_date = models.DateTimeField(blank=True, null=True)
@@ -42,6 +67,12 @@ class Voting(models.Model):
     tally = JSONField(blank=True, null=True)
     postproc = JSONField(blank=True, null=True)
 
+    def clean(self):
+        
+        if isinstance(self.start_date,datetime.datetime):
+            raise ValidationError('Voting started cannot be updated.')
+
+            
     def create_pubkey(self):
         if self.pub_key or not self.auths.count():
             return
@@ -60,10 +91,18 @@ class Voting(models.Model):
     def get_votes(self, token=''):
         # gettings votes from store
         votes = mods.get('store', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        #count votes
+        self.total_votes = len(votes)
+        #get census porcentage
+        census = mods.get('census', params={'voting_id': self.id}, HTTP_AUTHORIZATION='Token ' + token)
+        census_number = census.get('voters')
+        if len(census_number) != 0:
+            self.census_total = 100 * self.total_votes/len(census_number)
         # anon votes
         return [[i['a'], i['b']] for i in votes]
+        
 
-    def tally_votes(self, token=''):
+    def tally_votes(self,user,token=''):
         '''
         The tally is a shuffle and then a decrypt
         '''
@@ -94,30 +133,57 @@ class Voting(models.Model):
 
         self.tally = response.json()
         self.save()
+        usuario_salida=User(user)
+        try:
+            usuario_salida.email=user.email
+            usuario_salida.username=user.username
+        except:
+            usuario_salida.email=usuario_salida.email
+            usuario_salida.username=usuario_salida.username
+        self.do_postproc(usuario_salida)
 
-        self.do_postproc()
-
-    def do_postproc(self):
+    def do_postproc(self,user):
         tally = self.tally
-        options = self.question.options.all()
-
+        questions = self.question.all()
         opts = []
-        for opt in options:
-            if isinstance(tally, list):
-                votes = tally.count(opt.number)
-            else:
-                votes = 0
-            opts.append({
-                'option': opt.option,
-                'number': opt.number,
-                'votes': votes
-            })
-
+        
+        for q in questions:
+            options = q.options.all()
+            for opt in options:
+                if isinstance(tally, list):
+                    votes = tally.count(opt.number)
+                                        
+                else:
+                    votes = 0
+                opts.append({
+                    'question': opt.question.desc,
+                    'question_id':opt.question.id,
+                    'option': opt.option,
+                    'number': opt.number,
+                    'votes': votes
+                })
+        votes= int(len(tally)/len(questions))
         data = { 'type': 'IDENTITY', 'options': opts }
         postp = mods.post('postproc', json=data)
-
         self.postproc = postp
         self.save()
+
+        template = get_template('count.html')
+        content = template.render({'username': user,'votes': votes})
+       
+        message = EmailMultiAlternatives(
+            subject='Recuento de votos',
+            body='',
+            from_email=settings.EMAIL_HOST_USER,
+            to=[
+                user.email
+            ],
+            cc=[]
+        )
+
+        message.attach_alternative(content, 'text/html')
+        message.send()
+        
 
     def __str__(self):
         return self.name
