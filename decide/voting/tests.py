@@ -103,6 +103,32 @@ class VotingTestCase(BaseTestCase):
                     mods.post('store', json=data)
         return clear
     
+
+        
+    def test_update_voting_positive(self):
+        """test: se puede actualizar una votacion."""
+        v = Voting.objects.create(desc='Una votación', name="Votación")
+        self.assertEqual(v.name, 'Votación')
+        self.assertEqual(v.desc, 'Una votación')
+        # Actualizamos la votación
+        v.name='Se actualizó el nombre'
+        v.desc='Se actualizó la descripción'
+        v.save()
+        # Y vemos que se han aplicado los cambios
+        self.assertEqual(v.name, 'Se actualizó el nombre')
+        self.assertEqual(v.desc, 'Se actualizó la descripción')
+        v.delete()
+
+    def test_delete_voting(self):
+        """test: se puede borrar una votacion"""
+        v = Voting.objects.create(desc='Descripcion test', name="Votacion test")
+        v_pk = v.pk
+        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 1)
+        # Borramos la votacion
+        v.delete()
+        # Y comprobamos que se ha borrado 
+        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
+
     def complete_voting(self):
         v = self.create_voting('vot1')
         self.create_voters(v)
@@ -389,29 +415,6 @@ class SeleniumVotingTestCase(StaticLiveServerTestCase):
         #In case of a correct loging, a element with id 'user-tools' is shown in the upper right part
         self.assertTrue(len(self.driver.find_elements_by_id('user-tools'))==1)
 
-    def test_update_voting_(self):
-        """test: se puede actualizar una votacion."""
-        v = Voting.objects.create(desc='Una votación', name="Votación")
-        self.assertEqual(v.name, 'Votación')
-        self.assertEqual(v.desc, 'Una votación')
-        # Actualizamos la votación
-        v.name='Se actualizó el nombre'
-        v.desc='Se actualizó la descripción'
-        v.save()
-        # Y vemos que se han aplicado los cambios
-        self.assertEqual(v.name, 'Se actualizó el nombre')
-        self.assertEqual(v.desc, 'Se actualizó la descripción')
-        v.delete()
-
-    def test_delete_voting(self):
-        """test: se puede borrar una votacion"""
-        v = Voting.objects.create(desc='Descripcion test', name="Votacion test")
-        v_pk = v.pk
-        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 1)
-        # Borramos la votacion
-        v.delete()
-        # Y comprobamos que se ha borrado 
-        self.assertEqual(Voting.objects.filter(pk=v_pk).count(), 0)
 
     def crear_votacion(self):
         base_url = f'{self.live_server_url}'
