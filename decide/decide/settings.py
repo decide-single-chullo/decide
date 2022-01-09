@@ -73,7 +73,7 @@ MODULES = [
 ]
 
 
-BASEURL = 'https://decide-single-chullo.herokuapp.com'
+BASEURL = 'https://chullo2021.herokuapp.com'
 
 
 MIDDLEWARE = [
@@ -87,15 +87,15 @@ MIDDLEWARE = [
 ]
 
 APIS = {
-    'authentication': 'http://decide-single-chullo.herokuapp.com',
-    'base': 'http://decide-single-chullo.herokuapp.com',
-    'booth': 'http://decide-single-chullo.herokuapp.com',
-    'census': 'http://decide-single-chullo.herokuapp.com',
-    'mixnet': 'http://decide-single-chullo.herokuapp.com',
-    'postproc': 'http://decide-single-chullo.herokuapp.com',
-    'store': 'http://decide-single-chullo.herokuapp.com',
-    'visualizer': 'http://decide-single-chullo.herokuapp.com',
-    'voting': 'http://decide-single-chullo.herokuapp.com',
+    'authentication': 'https://chullo2021.herokuapp.com',
+    'base': 'https://chullo2021.herokuapp.com',
+    'booth': 'https://chullo2021.herokuapp.com',
+    'census': 'https://chullo2021.herokuapp.com',
+    'mixnet': 'https://chullo2021.herokuapp.com',
+    'postproc': 'https://chullo2021.herokuapp.com',
+    'store': 'https://chullo2021.herokuapp.com',
+    'visualizer': 'https://chullo2021.herokuapp.com',
+    'voting': 'https://chullo2021.herokuapp.com',
 }
 
 ROOT_URLCONF = 'decide.urls'
