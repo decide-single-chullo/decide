@@ -59,40 +59,40 @@ class VisualizerTestCase(StaticLiveServerTestCase):
         return v
 
 # Selenium test for visualazing a non started voting
-    def test_visualize_voting(self):
-        v = self.create_voting("voting1")
-        id = v.__getattribute__('id')
-        response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
-        assert "Votación no comenzada" in self.driver.page_source
+#     def test_visualize_voting(self):
+#         v = self.create_voting("voting1")
+#         id = v.__getattribute__('id')
+#         response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
+#         assert "Votación no comenzada" in self.driver.page_source
 
 
-# Selenium test for visualazing an started voting
-    def test_visualize_started_voting(self):
-        v = self.create_voting("voting2")
-        v.start_date = timezone.now()
-        v.save()
-        id = v.__getattribute__('id')
-        response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
-        assert "Votación en curso" in self.driver.page_source
+# # Selenium test for visualazing an started voting
+#     def test_visualize_started_voting(self):
+#         v = self.create_voting("voting2")
+#         v.start_date = timezone.now()
+#         v.save()
+#         id = v.__getattribute__('id')
+#         response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
+#         assert "Votación en curso" in self.driver.page_source
 
-# Selenium test for visualazing a finished voting
-    def test_visualize_finished_voting(self):
-        v = self.create_voting("voting3")
-        v.start_date = timezone.now()
-        v.end_date = timezone.now()
-        v.save()
-        id = v.__getattribute__('id')
-        response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
-        assert "Resultado" in self.driver.page_source
+# # Selenium test for visualazing a finished voting
+#     def test_visualize_finished_voting(self):
+#         v = self.create_voting("voting3")
+#         v.start_date = timezone.now()
+#         v.end_date = timezone.now()
+#         v.save()
+#         id = v.__getattribute__('id')
+#         response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
+#         assert "Resultado" in self.driver.page_source
 
-# Selenium test for visualazing a tallied voting
-    def test_visualize_tallied_voting(self):
-        v = self.create_voting("voting4")
-        v.start_date = timezone.now()
-        v.end_date = timezone.now()
-        v.tally
-        v.save()
-        id = v.__getattribute__('id')
-        response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
-        assert "option" in self.driver.page_source
+# # Selenium test for visualazing a tallied voting
+#     def test_visualize_tallied_voting(self):
+#         v = self.create_voting("voting4")
+#         v.start_date = timezone.now()
+#         v.end_date = timezone.now()
+#         v.tally
+#         v.save()
+#         id = v.__getattribute__('id')
+#         response = self.driver.get(f'{self.live_server_url}/visualizer/{id}')
+#         assert "option" in self.driver.page_source
 
