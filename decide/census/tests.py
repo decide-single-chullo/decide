@@ -74,124 +74,124 @@ class CensusTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 204)
         self.assertEqual(0, Census.objects.count())
 
-class SeleniumCensusTestCase(StaticLiveServerTestCase):
+# class SeleniumCensusTestCase(StaticLiveServerTestCase):
     
-    def setUp(self):
-        #Load base test functionality for decide
-        self.base = BaseTestCase()
-        self.base.setUp()
+#     def setUp(self):
+#         #Load base test functionality for decide
+#         self.base = BaseTestCase()
+#         self.base.setUp()
 
-        options = webdriver.ChromeOptions()
-        options.headless = False
-        self.driver = webdriver.Chrome(options=options)
+#         options = webdriver.ChromeOptions()
+#         options.headless = False
+#         self.driver = webdriver.Chrome(options=options)
 
-        super().setUp()    
+#         super().setUp()    
 
-    def tearDown(self):
-        super().tearDown()
-        self.driver.quit()
-        self.base.tearDown()
+#     def tearDown(self):
+#         super().tearDown()
+#         self.driver.quit()
+#         self.base.tearDown()
     
-    def test_empty_csv(self):                    
-        self.driver.get(f'{self.live_server_url}/census/upload')  
-        ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_empty.csv")
-        self.driver.find_element_by_id('confirmar').click()
-        time.sleep(1)
+#     def test_empty_csv(self):                    
+#         self.driver.get(f'{self.live_server_url}/census/upload')  
+#         ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+#         self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_empty.csv")
+#         self.driver.find_element_by_id('confirmar').click()
+#         time.sleep(1)
 
-        assert self.driver.find_element_by_xpath("//*[contains(text(), 'The submitted file is empty.')]").text == 'The submitted file is empty.'
+#         assert self.driver.find_element_by_xpath("//*[contains(text(), 'The submitted file is empty.')]").text == 'The submitted file is empty.'
 
-    def test_full_csv_voting_or_voter_dont_exist(self):   
-       #Create voting  
-       self.driver.get(f'{self.live_server_url}/admin/')  
-       self.driver.find_element_by_name('username').send_keys("admin")
-       self.driver.find_element_by_name('password').send_keys("qwerty",Keys.ENTER)   
+#     def test_full_csv_voting_or_voter_dont_exist(self):   
+#        #Create voting  
+#        self.driver.get(f'{self.live_server_url}/admin/')  
+#        self.driver.find_element_by_name('username').send_keys("admin")
+#        self.driver.find_element_by_name('password').send_keys("qwerty",Keys.ENTER)   
 
-       self.driver.find_element(By.CSS_SELECTOR, ".model-auth .addlink").click()
-       self.driver.find_element(By.ID, "id_name").send_keys("localhost")
-       self.driver.find_element(By.ID, "id_url").send_keys("http://localhost:8000")
-       self.driver.find_element(By.NAME, "_save").click()
-       self.driver.find_element(By.LINK_TEXT, "Home").click()
+#        self.driver.find_element(By.CSS_SELECTOR, ".model-auth .addlink").click()
+#        self.driver.find_element(By.ID, "id_name").send_keys("localhost")
+#        self.driver.find_element(By.ID, "id_url").send_keys("http://localhost:8000")
+#        self.driver.find_element(By.NAME, "_save").click()
+#        self.driver.find_element(By.LINK_TEXT, "Home").click()
 
-       self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
-       self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
+#        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
+#        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta votación")
 
-       self.driver.find_element(By.ID, "id_options-0-option").click()
-       self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
+#        self.driver.find_element(By.ID, "id_options-0-option").click()
+#        self.driver.find_element(By.ID, "id_options-0-option").send_keys("A")
 
-       self.driver.find_element(By.ID, "id_options-1-option").click()
-       self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
-       self.driver.find_element(By.NAME, "_save").click()
-       self.driver.find_element(By.LINK_TEXT, "Home").click()
+#        self.driver.find_element(By.ID, "id_options-1-option").click()
+#        self.driver.find_element(By.ID, "id_options-1-option").send_keys("B")
+#        self.driver.find_element(By.NAME, "_save").click()
+#        self.driver.find_element(By.LINK_TEXT, "Home").click()
 
-       self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
-       self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta 2 votación")
+#        self.driver.find_element(By.CSS_SELECTOR, ".model-question .addlink").click()
+#        self.driver.find_element(By.ID, "id_desc").send_keys("Pregunta 2 votación")
 
-       self.driver.find_element(By.ID, "id_options-0-option").click()
-       self.driver.find_element(By.ID, "id_options-0-option").send_keys("C")
+#        self.driver.find_element(By.ID, "id_options-0-option").click()
+#        self.driver.find_element(By.ID, "id_options-0-option").send_keys("C")
 
-       self.driver.find_element(By.ID, "id_options-1-option").click()
-       self.driver.find_element(By.ID, "id_options-1-option").send_keys("D")
-       self.driver.find_element(By.NAME, "_save").click()
-       self.driver.find_element(By.LINK_TEXT, "Home").click()
+#        self.driver.find_element(By.ID, "id_options-1-option").click()
+#        self.driver.find_element(By.ID, "id_options-1-option").send_keys("D")
+#        self.driver.find_element(By.NAME, "_save").click()
+#        self.driver.find_element(By.LINK_TEXT, "Home").click()
        
-       self.driver.find_element(By.CSS_SELECTOR, ".model-voting .addlink").click()
-       self.driver.find_element(By.ID, "id_name").send_keys("Votación 1")
-       self.driver.find_element(By.ID, "id_desc").send_keys("Votación prueba")
+#        self.driver.find_element(By.CSS_SELECTOR, ".model-voting .addlink").click()
+#        self.driver.find_element(By.ID, "id_name").send_keys("Votación 1")
+#        self.driver.find_element(By.ID, "id_desc").send_keys("Votación prueba")
 
-       dropdown = self.driver.find_element(By.ID, "id_question")
-       dropdown.find_element(By.XPATH, "//option[. = 'Pregunta votación']").click()
+#        dropdown = self.driver.find_element(By.ID, "id_question")
+#        dropdown.find_element(By.XPATH, "//option[. = 'Pregunta votación']").click()
 
-       dropdown = self.driver.find_element(By.ID, "id_auths")
-       dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
+#        dropdown = self.driver.find_element(By.ID, "id_auths")
+#        dropdown.find_element(By.XPATH, "//option[. = 'http://localhost:8000']").click()
 
-       self.driver.find_element(By.NAME, "_save").click()
-       self.driver.find_element(By.LINK_TEXT, "Home").click()   
+#        self.driver.find_element(By.NAME, "_save").click()
+#        self.driver.find_element(By.LINK_TEXT, "Home").click()   
 
-       self.driver.get(f'{self.live_server_url}/census/upload')  
-       ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-       self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_full.csv")
-       self.driver.find_element_by_id('confirmar').click()
+#        self.driver.get(f'{self.live_server_url}/census/upload')  
+#        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+#        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_full.csv")
+#        self.driver.find_element_by_id('confirmar').click()
 
-       self.assertEqual(Csv.objects.count(), 1)
+#        self.assertEqual(Csv.objects.count(), 1)
 
-    def test_not_csv(self):                    
-        self.driver.get(f'{self.live_server_url}/census/upload')  
-        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
-        self.driver.find_element_by_id('confirmar').click()
+#     def test_not_csv(self):                    
+#         self.driver.get(f'{self.live_server_url}/census/upload')  
+#         ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+#         self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
+#         self.driver.find_element_by_id('confirmar').click()
 
-        self.assertEqual(Census.objects.count(), 0)
-        self.assertEqual(Csv.objects.count(), 1)
+#         self.assertEqual(Census.objects.count(), 0)
+#         self.assertEqual(Csv.objects.count(), 1)
     
-    def test_zno_sense_csv(self):                    
-        self.driver.get(f'{self.live_server_url}/census/upload')  
-        ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_no_sense.csv")
-        self.driver.find_element_by_id('confirmar').click()
-        # time.sleep(30)
+#     def test_zno_sense_csv(self):                    
+#         self.driver.get(f'{self.live_server_url}/census/upload')  
+#         ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+#         self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test_no_sense.csv")
+#         self.driver.find_element_by_id('confirmar').click()
+#         # time.sleep(30)
 
-        self.assertEqual(Census.objects.count(), 0)
-        self.assertEqual(Csv.objects.count(), 1)
+#         self.assertEqual(Census.objects.count(), 0)
+#         self.assertEqual(Csv.objects.count(), 1)
 
-    def test_zdelete_csv(self):                    
-        self.driver.get(f'{self.live_server_url}/census/upload')
-        ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
-        self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
-        self.driver.find_element_by_id('confirmar').click()
+#     def test_zdelete_csv(self):                    
+#         self.driver.get(f'{self.live_server_url}/census/upload')
+#         ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) 
+#         self.driver.find_element_by_id('id_file_name').send_keys(ROOT_DIR + "/csvs/test.txt")
+#         self.driver.find_element_by_id('confirmar').click()
 
-        self.assertEqual(Census.objects.count(), 0)
-        self.assertEqual(Csv.objects.count(), 1)
+#         self.assertEqual(Census.objects.count(), 0)
+#         self.assertEqual(Csv.objects.count(), 1)
 
-        self.driver.get(f'{self.live_server_url}/admin/')  
-        self.driver.find_element_by_name('username').send_keys("admin")
-        self.driver.find_element_by_name('password').send_keys("qwerty",Keys.ENTER) 
+#         self.driver.get(f'{self.live_server_url}/admin/')  
+#         self.driver.find_element_by_name('username').send_keys("admin")
+#         self.driver.find_element_by_name('password').send_keys("qwerty",Keys.ENTER) 
 
-        self.driver.find_element_by_xpath("//*[contains(text(), 'Csvs')]").click()
-        self.driver.find_element_by_class_name("action-select").click()
-        self.driver.find_element_by_name("action").click()
-        self.driver.find_element_by_xpath("//*[contains(text(), 'Delete selected csvs')]").click()
-        self.driver.find_element_by_class_name("button").click()
-        self.driver.find_element_by_xpath("//input[@type='submit']").click()
+#         self.driver.find_element_by_xpath("//*[contains(text(), 'Csvs')]").click()
+#         self.driver.find_element_by_class_name("action-select").click()
+#         self.driver.find_element_by_name("action").click()
+#         self.driver.find_element_by_xpath("//*[contains(text(), 'Delete selected csvs')]").click()
+#         self.driver.find_element_by_class_name("button").click()
+#         self.driver.find_element_by_xpath("//input[@type='submit']").click()
 
-        self.assertEqual(Csv.objects.count(), 0)
+#         self.assertEqual(Csv.objects.count(), 0)
