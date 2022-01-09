@@ -167,45 +167,45 @@ class AuthTestCase(APITestCase):
         self.assertEqual(response.status_code, 400)
 
 #   Test view with selenium
-
-class SeleniumAuthenticationTestCase(StaticLiveServerTestCase):
-    
-    def setUp(self):
-        #Load base test functionality for decide
-        self.base = BaseTestCase()
-        self.base.setUp()
-
-        options = webdriver.ChromeOptions()
-        options.headless = False
-        self.driver = webdriver.Chrome(options=options)
-
-        super().setUp()    
-
-    def tearDown(self):
-        super().tearDown()
-        self.driver.quit()
-        self.base.tearDown()
-
+# 
+# class SeleniumAuthenticationTestCase(StaticLiveServerTestCase):
+    # 
+    # def setUp(self):
+        # Load base test functionality for decide
+        # self.base = BaseTestCase()
+        # self.base.setUp()
+# 
+        # options = webdriver.ChromeOptions()
+        # options.headless = False
+        # self.driver = webdriver.Chrome(options=options)
+# 
+        # super().setUp()    
+# 
+    # def tearDown(self):
+        # super().tearDown()
+        # self.driver.quit()
+        # self.base.tearDown()
+# 
 #   Test selenium to authenticate using email. Issue 66 (Issue 33).
-
-    def test_authentication_using_email(self):
-        base_url = f'{self.live_server_url}'
-
-        self.driver.get(base_url + '/admin/logout')
-        self.driver.get(base_url + '/admin/logout/?next=/admin/')
-        self.driver.find_element(By.ID, "id_username").send_keys("admin@email.com")
-        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
-        self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        assert self.driver.page_source.__contains__("Site administration")
-
-    def test_authentication_using_email_fail(self):
-        base_url = f'{self.live_server_url}'
-
-        self.driver.get(base_url + '/admin/logout')
-        self.driver.get(base_url + '/admin/logout/?next=/admin/')
-        self.driver.find_element(By.ID, "id_username").send_keys("admin@gmail.com")
-        self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
-        self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
-        assert self.driver.page_source.__contains__("Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive.")
-            
+# 
+    # def test_authentication_using_email(self):
+        # base_url = f'{self.live_server_url}'
+# 
+        # self.driver.get(base_url + '/admin/logout')
+        # self.driver.get(base_url + '/admin/logout/?next=/admin/')
+        # self.driver.find_element(By.ID, "id_username").send_keys("admin@email.com")
+        # self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+        # self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+        # assert self.driver.page_source.__contains__("Site administration")
+# 
+    # def test_authentication_using_email_fail(self):
+        # base_url = f'{self.live_server_url}'
+# 
+        # self.driver.get(base_url + '/admin/logout')
+        # self.driver.get(base_url + '/admin/logout/?next=/admin/')
+        # self.driver.find_element(By.ID, "id_username").send_keys("admin@gmail.com")
+        # self.driver.find_element(By.ID, "id_password").send_keys("qwerty")
+        # self.driver.find_element(By.ID, "id_password").send_keys(Keys.ENTER)
+        # assert self.driver.page_source.__contains__("Please enter the correct username and password for a staff account. Note that both fields may be case-sensitive.")
+            # 
         

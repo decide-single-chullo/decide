@@ -32,21 +32,11 @@ jobs:
         pip install -r requirements.txt
         pip install codacy-coverage
     - name: Run migrations
-      run: cd decide;python manage.py makemigrations;python manage.py migrate
+      run: cd decide;USER_MAIL='${{ secrets.USER_MAIL }}';USER_MAIL_PASSWORD='${{ secrets.USER_MAIL_PASSWORD }}';export USER_MAIL;export USER_MAIL_PASSWORD;python manage.py makemigrations;python manage.py migrate
     - name: Run tests     
-      run: cd decide;coverage run --branch --source=. ./manage.py test; coverage xml;
+      run: cd decide;sudo apt-get install chromium-browser chromium-chromedriver;USER_MAIL='${{ secrets.USER_MAIL }}';USER_MAIL_PASSWORD='${{ secrets.USER_MAIL_PASSWORD }}';export USER_MAIL;export USER_MAIL_PASSWORD;coverage run --branch --source=. ./manage.py test; coverage xml;
     - name: Codacy Coverage Reporter
       uses: codacy/codacy-coverage-reporter-action@v1.1.0
       with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: decide/coverage.xml
-  deploy:
-    if: ${{github.ref == 'refs/heads/develop-workflows' }}
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
-      with:
-          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
-          heroku_app_name: "decide-single-chullo"
-          heroku_email: "alebangon@alum.us.es"
