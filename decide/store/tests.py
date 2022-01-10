@@ -1,10 +1,8 @@
 import datetime
 import random
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.test import TestCase
-from rest_framework.test import APIClient
-from rest_framework.test import APITestCase
 
 from .models import Vote
 from .serializers import VoteSerializer
@@ -12,8 +10,8 @@ from base import mods
 from base.models import Auth
 from base.tests import BaseTestCase
 from census.models import Census
-from mixnet.models import Key
-from voting.models import Question
+
+from voting.models import Question, QuestionOption
 from voting.models import Voting
 
 
@@ -21,22 +19,30 @@ class StoreTextCase(BaseTestCase):
 
     def setUp(self):
         super().setUp()
-        self.question = Question(desc='qwerty')
+        self.question = Question(id=1,desc='test question')
         self.question.save()
-        self.voting = Voting(pk=5001,
-                             name='voting example',
-                             question=self.question,
-                             start_date=timezone.now(),
-        )
+        for i in range(5):
+            opt = QuestionOption(question=self.question, option='option {}'.format(i+1))
+            opt.save()
+
+        self.voting = Voting(id=5001, name='test voting')
+
         self.voting.save()
+        self.voting.question.add(self.question)
+        a, _ = Auth.objects.get_or_create(url=settings.BASEURL,
+                                          defaults={'me': True, 'name': 'test auth'})
+        a.save()
+        self.voting.auths.add(a)
 
     def tearDown(self):
         super().tearDown()
 
     def gen_voting(self, pk):
-        voting = Voting(pk=pk, name='v1', question=self.question, start_date=timezone.now(),
+        voting = Voting(pk=pk, name='v1' + str(pk), start_date=timezone.now(),
                 end_date=timezone.now() + datetime.timedelta(days=1))
         voting.save()
+        voting.question.add(self.question)
+        return voting
 
     def get_or_create_user(self, pk):
         user, _ = User.objects.get_or_create(pk=pk)
@@ -49,24 +55,26 @@ class StoreTextCase(BaseTestCase):
         votings = [random.randint(1, 5000) for i in range(10)]
         users = [random.randint(3, 5002) for i in range(50)]
         for v in votings:
-            a = random.randint(2, 500)
-            b = random.randint(2, 500)
-            self.gen_voting(v)
+            a = str(random.randint(2, 500))
+            b = str(random.randint(2, 500))
+            voting = self.gen_voting(v)
             random_user = random.choice(users)
             user = self.get_or_create_user(random_user)
             self.login(user=user.username)
             census = Census(voting_id=v, voter_id=random_user)
             census.save()
+            question = voting.question.all()
             data = {
                 "voting": v,
                 "voter": random_user,
+                "question": question[0].id,
                 "vote": { "a": a, "b": b }
             }
             response = self.client.post('/store/', data, format='json')
             self.assertEqual(response.status_code, 200)
 
         self.logout()
-        return votings, users
+        return votings, users, question[0].id
 
     def test_gen_vote_invalid(self):
         data = {
@@ -87,6 +95,7 @@ class StoreTextCase(BaseTestCase):
         data = {
             "voting": VOTING_PK,
             "voter": 1,
+            "question": 234,
             "vote": { "a": CTE_A, "b": CTE_B }
         }
         user = self.get_or_create_user(1)
@@ -118,7 +127,7 @@ class StoreTextCase(BaseTestCase):
         self.assertEqual(votes[0], VoteSerializer(Vote.objects.all().first()).data)
 
     def test_filter(self):
-        votings, voters = self.gen_votes()
+        votings, voters, question_id = self.gen_votes()
         v = votings[0]
 
         response = self.client.get('/store/?voting_id={}'.format(v), format='json')
@@ -143,7 +152,7 @@ class StoreTextCase(BaseTestCase):
         self.assertEqual(len(votes), Vote.objects.filter(voter_id=v).count())
 
     def test_hasvote(self):
-        votings, voters = self.gen_votes()
+        votings, voters, question_id = self.gen_votes()
         vo = Vote.objects.first()
         v = vo.voting_id
         u = vo.voter_id
@@ -168,6 +177,7 @@ class StoreTextCase(BaseTestCase):
         data = {
             "voting": 5001,
             "voter": 1,
+            "question":2,
             "vote": { "a": 30, "b": 55 }
         }
         census = Census(voting_id=5001, voter_id=1)
