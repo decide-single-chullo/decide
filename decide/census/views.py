@@ -61,7 +61,7 @@ def upload_file_view(request):
         form.save()
         form = CsvModelForm()
         obj = Csv.objects.get(activated=False)
-        var = '.csv' not in str(obj.file_name)
+        var = '.csv' not in str(obj.file_name) or '.xlsx' not in str(obj.file_name)
         if var:
             pass
         else:
